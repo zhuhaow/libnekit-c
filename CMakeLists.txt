@@ -7,4 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(src
   src/utils/linked_list.c
   src/utils/memory_pool.c)
-add_library(nekit SHARED ${src})
+
+add_subdirectory(deps/libuv)
+
+add_library(nekit ${src})
+target_link_libraries(nekit uv)
