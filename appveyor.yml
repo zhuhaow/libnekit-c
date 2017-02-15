@@ -1,0 +1,25 @@
+version: 0.0.1.{build}
+
+matrix:
+  os:
+    - Visual Studio 2015
+    - Visual Studio 2013
+
+environment:
+  matrix:
+    - CMAKE_OPTIONS: ""
+
+init:
+  - 'echo Building libnekit %version% for Windows'
+  - 'echo System architecture: %PLATFORM%'
+  - 'echo Repo build branch is: %APPVEYOR_REPO_BRANCH%'
+  - 'echo Build folder is: %APPVEYOR_BUILD_FOLDER%'
+  - 'echo Repo build commit is: %APPVEYOR_REPO_COMMIT%'
+  - 'echo Cygwin root is: %CYG_ROOT%'
+
+build_script:
+  - ps: |
+      md build
+      cd build
+      cmake .. $env:CMAKE_OPTIONS
+      cmake --build .
