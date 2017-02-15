@@ -1,3 +1,6 @@
 [submodule "deps/libuv"]
 	path = deps/libuv
 	url = https://github.com/jen20/libuv-cmake.git
+[submodule "test/deps/check"]
+	path = test/deps/check
+	url = https://github.com/libcheck/check.git
