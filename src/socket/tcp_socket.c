@@ -85,6 +85,8 @@ bool __tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
     return false;
   case UV_ETIMEDOUT:
   case UV_ECONNRESET:
+  case UV_ENETDOWN:
+  case UV_ENETUNREACH:
     socket->on_error(socket, status);
     ne_tcp_socket_close(socket);
     return true;
