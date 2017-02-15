@@ -7,6 +7,9 @@ compiler:
 - clang
 - gcc
 
+dist: trusty
+sudo: false
+
 env:
   matrix:
     - CMAKE_OPTIONS=""
