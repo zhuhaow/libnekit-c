@@ -10,6 +10,13 @@ compiler:
 dist: trusty
 sudo: false
 
+osx_image:
+  matrix:
+    - xcode8.2
+    - xcode8.1
+    - xcode8
+    - xcode7.3
+
 env:
   matrix:
     - CMAKE_OPTIONS=""
