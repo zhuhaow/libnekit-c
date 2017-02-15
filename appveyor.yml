@@ -1,9 +1,8 @@
 version: 0.0.1.{build}
 
-matrix:
-  os:
-    - Visual Studio 2015
-    - Visual Studio 2013
+os:
+  - Visual Studio 2015
+  - Visual Studio 2013
 
 environment:
   matrix:
