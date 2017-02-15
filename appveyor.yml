@@ -21,7 +21,6 @@ init:
   - 'echo Repo build branch is: %APPVEYOR_REPO_BRANCH%'
   - 'echo Build folder is: %APPVEYOR_BUILD_FOLDER%'
   - 'echo Repo build commit is: %APPVEYOR_REPO_COMMIT%'
-  - 'echo Cygwin root is: %CYG_ROOT%'
 
 build_script:
   - ps: |
