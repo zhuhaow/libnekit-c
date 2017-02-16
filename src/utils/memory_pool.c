@@ -1,25 +1,25 @@
 #include "memory_pool.h"
+#include "mem.h"
 #include <assert.h>
-#include <stdlib.h>
 
 int ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
                      size_t block_count) {
   // overflow is not checked, make sure block_size * block_count will not
   // overflow
   pool->pool_size = block_count * block_size;
-  pool->pool_data = malloc(pool->pool_size);
+  pool->pool_data = calloc(pool->pool_size, 1);
   if (!pool->pool_data)
     return -1;
 
   pool->block_count = block_count;
   pool->block_size = block_size;
 
-  pool->bufs = calloc(pool->block_count, sizeof(ne_memory_buf_t));
+  pool->bufs = ALLOC(ne_memory_buf_t, pool->block_count);
+  if (!pool->bufs)
+    return -1;
 
   SLIST_INIT(&pool->unused_list);
 
-  if (!pool->bufs)
-    return -1;
   for (int i = 0; i < block_count; ++i) {
     ne_memory_buf_t *buf = pool->bufs + i;
     buf->data = pool->pool_data + i * block_size;
