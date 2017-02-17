@@ -68,8 +68,8 @@ ne_memory_buf_t *ne_memory_pool_get_buf(ne_memory_pool_t *pool) {
 void ne_memory_buf_free(ne_memory_buf_t *buf) {
   if (buf->type == ALLOC) {
     free(buf->data);
-    free(buf);
     buf->pool->alloc_bufs--;
+    free(buf);
     return;
   }
 
