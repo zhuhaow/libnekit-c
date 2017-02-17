@@ -69,7 +69,7 @@ START_TEST (memory_pool_buf) {
 }
 END_TEST
 
-Suite *pool_suite() {
+Suite *build_suite() {
   Suite *s;
   TCase *init_case, *buf_case;
 
@@ -89,7 +89,7 @@ Suite *pool_suite() {
 
 int main (int argc, char *argv[]) {
   int number_failed;
-  Suite *suite = pool_suite();
+  Suite *suite = build_suite();
   SRunner *runner = srunner_create(suite);
   srunner_run_all(runner, CK_NORMAL);
   number_failed = srunner_ntests_failed(runner);
