@@ -15,5 +15,3 @@ add_executable(test_memory_pool utils/test_memory_pool.c)
 target_link_libraries(test_memory_pool ${LIBS})
 add_test(test_memory_pool ${CMAKE_CURRENT_BINARY_DIR}/test_memory_pool)
 
-
-
