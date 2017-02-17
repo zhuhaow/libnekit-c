@@ -30,5 +30,4 @@ add_library(nekit ${SOURCES})
 target_include_directories(nekit INTERFACE include)
 target_link_libraries(nekit uv)
 
-enable_testing()
 add_subdirectory(test)
