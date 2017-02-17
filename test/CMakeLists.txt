@@ -1,6 +1,6 @@
 enable_testing()
 
-set(CHECK_DISABLE_TEST ON)
+set(CHECK_ENABLE_TESTS OFF)
 add_subdirectory(deps/check)
 set(CHECK_HEADER_PATH ${CMAKE_CURRENT_BINARY_DIR}/deps/check)
 include_directories(${CHECK_HEADER_PATH} ${CHECK_HEADER_PATH}/src)
