@@ -13,6 +13,7 @@ START_TEST (memory_pool_init) {
   ck_assert_uint_eq(pool->pool_size, BLOCK_COUNT * BLOCK_SIZE);
   ck_assert_uint_eq(pool->block_size, BLOCK_SIZE);
   ck_assert_uint_eq(pool->block_count, BLOCK_COUNT);
+  ne_memory_pool_free(pool);
 }
 END_TEST
 
