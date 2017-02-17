@@ -1,10 +1,11 @@
 #ifndef MEMORY_POOL_H_
 #define MEMORY_POOL_H_
 
+#include "error.h"
+#include "queue.h"
 #include "types.h"
 #include <stdint.h>
 
-#include "queue.h"
 enum ne_memory_t { POOL, ALLOC };
 
 typedef struct ne_memeory_pool ne_memory_pool_t;
@@ -25,14 +26,16 @@ struct ne_memeory_pool {
   size_t block_count;
   size_t block_size;
   ne_memory_buf_t *bufs;
+
+  size_t alloc_bufs;
+
   SLIST_HEAD(memory_buf_list, ne_memory_buf) unused_list;
 };
 
-int ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
+ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
                      size_t block_count);
-ne_memory_buf_t *memory_buf_create(size_t size);
-ne_memory_buf_t *memory_pool_get_buf(ne_memory_pool_t *pool, bool alloc_if_full);
-void memory_buf_free(ne_memory_buf_t *buf);
-bool memory_pool_free(ne_memory_pool_t *pool);
+ne_memory_buf_t *ne_memory_pool_get_buf(ne_memory_pool_t *pool);
+void ne_memory_buf_free(ne_memory_buf_t *buf);
+bool ne_memory_pool_free(ne_memory_pool_t *pool);
 
 #endif

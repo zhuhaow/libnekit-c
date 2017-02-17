@@ -3,4 +3,4 @@
 	url = https://github.com/jen20/libuv-cmake.git
 [submodule "test/deps/check"]
 	path = test/deps/check
-	url = https://github.com/libcheck/check.git
+	url = https://github.com/zhuhaow/check.git
