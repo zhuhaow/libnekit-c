@@ -28,5 +28,5 @@ script:
     cd build &&
     cmake .. $CMAKE_OPTIONS &&
     cmake --build . 
-  - if [ $TRAVIS_OS_NAME == 'osx']; then ctest --output-on-failure; fi
-  - if [ $TRAVIS_OS_NAME == 'linux']; then ctest -T memcheck --output-on-failure; fi
+  - if [ "$TRAVIS_OS_NAME" == 'osx' ]; then ctest --output-on-failure; fi
+  - if [ "$TRAVIS_OS_NAME" == 'linux' ]; then ctest -T memcheck --output-on-failure; fi
