@@ -19,7 +19,7 @@ addons:
 
 env:
   matrix:
-    - CMAKE_OPTIONS=""
+    - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
 
 before_install:
 
