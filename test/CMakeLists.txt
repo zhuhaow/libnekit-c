@@ -9,7 +9,7 @@ set(LIBS compat check nekit)
 include_directories(../include)
 
 include(CTest)
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --show-leak-kinds=all")
 
 add_executable(test_memory_pool utils/test_memory_pool.c)
 target_link_libraries(test_memory_pool ${LIBS})
