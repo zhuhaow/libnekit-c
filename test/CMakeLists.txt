@@ -10,7 +10,7 @@ include_directories(../include)
 
 option(NE_ENABLE_MEMCHECK "Enable valgrind when running tests." ON)
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS --trace-children=yes --leak-check=full --show-leak-kinds=all)
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS --trace-children=yes --leak-check=full)
 
 function(add_mem_test name)
   if (CTEST_MEMORYCHECK_COMMAND AND NE_ENABLE_MEMCHECK)
