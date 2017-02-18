@@ -143,7 +143,7 @@ void __tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *bu
 
   if (nread == UV_EOF) {
     socket->receiveEOF = true;
-    ne_tcp_socket_stop_read(socket);
+    ne_tcp_socket_read_stop(socket);
   } else {
     assert(nread >= 0);
   }
