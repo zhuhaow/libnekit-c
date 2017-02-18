@@ -6,7 +6,7 @@ set(CHECK_HEADER_PATH ${CMAKE_CURRENT_BINARY_DIR}/deps/check)
 include_directories(${CHECK_HEADER_PATH} ${CHECK_HEADER_PATH}/src)
 
 set(LIBS compat check nekit)
-include_directories(../include include)
+include_directories(include)
 
 option(NE_ENABLE_MEMCHECK "Enable valgrind when running tests." ON)
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
