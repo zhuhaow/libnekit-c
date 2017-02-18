@@ -25,6 +25,7 @@ add_subdirectory(deps/libuv)
 include_directories(deps/libuv/libuv/include)
 
 include_directories(BEFORE include)
+include_directories(dev_header)
 
 add_library(nekit ${SOURCES})
 target_include_directories(nekit INTERFACE include)
