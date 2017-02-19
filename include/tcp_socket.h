@@ -30,10 +30,16 @@ enum ne_tcp_socket_status {
   CLOSED
 };
 
+typedef union {
+  uv_handle_t handle;
+  uv_stream_t stream;
+  uv_tcp_t tcp;
+} ne_uv_tcp_handle_t;
+
 /* The TCP socket. */
 struct ne_tcp_socket {
   /* The underlying uv_handle. */
-  uv_tcp_t handle;
+  ne_uv_tcp_handle_t handle;
 
   /* User context */
   void *context;
