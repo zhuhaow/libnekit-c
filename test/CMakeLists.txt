@@ -26,3 +26,7 @@ endfunction()
 add_executable(test_memory_pool utils/test_memory_pool.c)
 target_link_libraries(test_memory_pool ${LIBS})
 add_mem_test(test_memory_pool)
+
+add_executable(test_tcp_socket socket/test_tcp_socket.c)
+target_link_libraries(test_tcp_socket ${LIBS})
+add_mem_test(test_tcp_socket)
