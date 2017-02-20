@@ -12,6 +12,11 @@ sudo: false
 
 osx_image: xcode8
 
+addons:
+  apt:
+    packages:
+      - valgrind
+
 env:
   matrix:
     - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
