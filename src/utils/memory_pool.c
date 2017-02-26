@@ -24,7 +24,7 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
 
   for (int i = 0; i < block_count; ++i) {
     ne_memory_buf_t *buf = pool->bufs + i;
-    buf->data = pool->pool_data + i * block_size;
+    buf->data = (char *)pool->pool_data + i * block_size;
     buf->size = block_size;
     buf->type = POOL;
     buf->pool = pool;
