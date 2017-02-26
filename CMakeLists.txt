@@ -21,8 +21,8 @@ set(SOURCES
   # src/socket/proxy/sock5_socket.c
   )
 
-add_subdirectory(deps/libuv)
-include_directories(deps/libuv/libuv/include)
+link_directories(deps/deps_build/lib)
+include_directories(deps/deps_build/include)
 
 include_directories(BEFORE include)
 include_directories(dev_header)
