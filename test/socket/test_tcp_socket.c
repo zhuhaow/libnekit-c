@@ -6,18 +6,35 @@
 
 #include "uv.h"
 
-void on_connect1(ne_tcp_socket_t *socket) {
-  // the corresponding server socket will close.
+#include <stdio.h>
+
+
+bool connected;
+uv_timer_t timer;
+
+void timer_cb1(uv_timer_t *handle) {
+  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
   ne_tcp_socket_close(socket);
   uv_close(socket->context, NULL);
+  uv_close(handle, NULL);
+}
+
+void on_connect1(ne_tcp_socket_t *socket) {
+  // the corresponding server socket will close.
+  connected = true;
+  timer.data = socket;
+  uv_timer_start(&timer, timer_cb1, 0, 0);
 }
 
 START_TEST (connect_test) {
+  uv_timer_init(uv_default_loop(), &timer);
+
   server_t server;
   start_server(&server, echo_server_conn_cb);
 
   ne_tcp_socket_t socket;
   ne_tcp_socket_init(uv_default_loop(), &socket);
+  connected = false;
 
   socket.context = &server;
   socket.on_connect = on_connect1;
@@ -26,9 +43,11 @@ START_TEST (connect_test) {
   assert(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
   ne_tcp_socket_connect(&socket, (struct sockaddr *)&addr);
 
-  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  ck_assert_int_eq(uv_run(uv_default_loop(), UV_RUN_DEFAULT), 0);
 
-  ck_assert(uv_loop_close(uv_default_loop()) == 0);
+  ck_assert_int_eq(uv_loop_close(uv_default_loop()), 0);
+
+  ck_assert(connected);
 
   ck_assert_int_eq(server.listen_stat.socket_accept, 1);
   ck_assert_int_eq(server.listen_stat.last_error, 0);
