@@ -27,13 +27,13 @@ init:
 
 before_build:
   - cd deps/libuv
-  - vcbuild.bat release %platform% shared
+  - vcbuild.bat release %platform% static
   - cd ../..
   - ps: |
       md deps/deps_build/include
       md deps/deps_build/lib
       Copy-Item deps/libuv/include/* deps/deps_build/include
-      Copy-Item deps/libuv/Release/libuv.lib deps/deps_build/lib/libuv.lib
+      Copy-Item deps/libuv/Release/lib/libuv.lib deps/deps_build/lib/libuv.lib
 
 build_script:
   - ps: |
