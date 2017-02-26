@@ -26,7 +26,7 @@ cache:
     - deps/deps_build
 
 before_script:
-  - if [ ! -d deps/deps_build/lib ]; then script/build_deps.sh; fi
+  - if [ ! -d deps/deps_build/lib ]; then scripts/build_deps.sh; fi
 
 script:
   - mkdir build &&
