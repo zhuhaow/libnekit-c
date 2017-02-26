@@ -21,7 +21,12 @@ env:
   matrix:
     - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
 
-before_install:
+cache:
+  directories:
+    - deps/deps_build
+
+before_script:
+  - if [ ! -d deps/deps_build ]; then script/build_deps.sh; fi
 
 script:
   - mkdir build &&
