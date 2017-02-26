@@ -1,6 +1,10 @@
 enable_testing()
 
 set(LIBS compat check nekit)
+if (LINUX)
+  set(LIBS rt ${LIBS})
+endif()
+
 include_directories(include)
 
 option(NE_ENABLE_MEMCHECK "Enable valgrind when running tests." ON)
