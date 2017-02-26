@@ -35,16 +35,17 @@ before_build:
       Copy-Item deps/libuv/include/* deps/deps_build/include
       Copy-Item deps/libuv/Release/lib/libuv.lib deps/deps_build/lib/libuv.lib
   - ps: |
-      if ( $env:platform -eq 'x64' ) {
-        $env:CMAKE_OPTIONS = "-G `"Visual Studio 14 Win64`" $env:CMAKE_OPTIONS"
-      }
 
 build_script:
   - ps: |
       md build
       cd build
       echo $env:CMAKE_OPTIONS
-      cmake $env:CMAKE_OPTIONS ..
+      if ( $env:platform -eq 'x64' ) {
+        cmake -G "Visual Studio 14 2015 Win64" $env:CMAKE_OPTIONS ..
+      } else {
+        cmake $env:CMAKE_OPTIONS ..
+      }
       cmake --build .
 
 test_script:
