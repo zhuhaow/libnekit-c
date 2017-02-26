@@ -15,6 +15,10 @@ environment:
   matrix:
     - CMAKE_OPTIONS: ""
 
+platform:
+  - x86
+  - x64
+
 init:
   - 'echo Building libnekit %version% for Windows'
   - 'echo System architecture: %PLATFORM%'
