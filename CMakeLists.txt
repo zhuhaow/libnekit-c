@@ -28,7 +28,8 @@ include_directories(BEFORE include)
 
 add_library(nekit ${SOURCES})
 target_include_directories(nekit INTERFACE include)
-set(LIBS ${LIBS} uv)
+find_library(UV_LIBRARY NAMES uv libuv)
+set(LIBS ${LIBS} ${UV_LIBRARY})
 target_link_libraries(nekit ${LIBS})
 
 enable_testing()
