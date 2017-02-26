@@ -25,7 +25,6 @@ link_directories(deps/deps_build/lib)
 include_directories(deps/deps_build/include)
 
 include_directories(BEFORE include)
-include_directories(dev_header)
 
 add_library(nekit ${SOURCES})
 target_include_directories(nekit INTERFACE include)

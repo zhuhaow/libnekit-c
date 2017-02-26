@@ -14,6 +14,13 @@ sh autogen.sh
 make
 make install
 
+CHECK_PATH=$SCRIPTPATH/../test/deps/check/
+cd $CHECK_PATH
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=`pwd`/../../deps/deps_build/
+make
+make install
 
 cd $CURRENTPATH
 
