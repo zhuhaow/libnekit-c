@@ -28,7 +28,7 @@ include_directories(BEFORE include)
 
 add_library(nekit ${SOURCES})
 target_include_directories(nekit INTERFACE include)
-find_library(UV_LIBRARY NAMES uv libuv)
+find_library(UV_LIBRARY NAMES uv libuv HINTS deps/deps_build/lib)
 set(LIBS ${LIBS} ${UV_LIBRARY})
 target_link_libraries(nekit ${LIBS})
 
