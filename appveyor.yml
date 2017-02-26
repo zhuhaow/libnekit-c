@@ -33,7 +33,7 @@ before_build:
       md deps/deps_build/include
       md deps/deps_build/lib
       Copy-Item deps/libuv/include/* deps/deps_build/include
-      Copy-Item deps/libuv/Debug/lib/* deps/deps_build/
+      Copy-Item deps/libuv/Release/* deps/deps_build/lib
 
 build_script:
   - ps: |
