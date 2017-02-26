@@ -32,10 +32,9 @@ find_library(UV_LIBRARY NAMES uv libuv HINTS deps/deps_build/lib)
 set(LIBS ${LIBS} ${UV_LIBRARY})
 if (WIN32)
   set(LIBS ${LIBS} ws2_32 iphlpapi psapi userenv)
+  set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
 endif()
 target_link_libraries(nekit ${LIBS})
-
-set(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"LIBCMTD.lib\")
 
 enable_testing()
 add_subdirectory(test)
