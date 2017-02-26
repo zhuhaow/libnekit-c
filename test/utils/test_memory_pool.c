@@ -1,4 +1,5 @@
-#include "check.h"
+#include "greatest.h"
+
 #include "helper.h"
 #include "memory_pool.h"
 #include "error.h"
@@ -8,43 +9,43 @@
 #define BLOCK_SIZE 1024
 #define BLOCK_COUNT 64
 
-START_TEST (memory_pool_init) {
+TEST memory_pool_init() {
   ne_memory_pool_t *pool = ALLOC(ne_memory_pool_t, 1);
-  ck_assert(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
-  ck_assert_uint_eq(pool->pool_size, BLOCK_COUNT * BLOCK_SIZE);
-  ck_assert_uint_eq(pool->block_size, BLOCK_SIZE);
-  ck_assert_uint_eq(pool->block_count, BLOCK_COUNT);
+  ASSERT(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
+  ASSERT_EQ(pool->pool_size, BLOCK_COUNT * BLOCK_SIZE);
+  ASSERT_EQ(pool->block_size, BLOCK_SIZE);
+  ASSERT_EQ(pool->block_count, BLOCK_COUNT);
   ne_memory_pool_free(pool);
+  PASS();
 }
-END_TEST
 
-START_TEST (memory_pool_buf) {
+TEST memory_pool_buf() {
   ne_memory_pool_t *pool = ALLOC(ne_memory_pool_t, 1);
-  ck_assert(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
+  ASSERT(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
 
   ne_memory_buf_t *pool_bufs[BLOCK_COUNT];
   for (int i = 0; i < BLOCK_COUNT; ++i) {
-    ck_assert_ptr_nonnull(pool_bufs[i] = ne_memory_pool_get_buf(pool));
-    ck_assert(pool_bufs[i]->used);
-    ck_assert(pool_bufs[i]->size == BLOCK_SIZE);
-    ck_assert_ptr_nonnull(pool_bufs[i]->data);
-    ck_assert(pool_bufs[i]->type == POOL);
-    ck_assert_ptr_eq(pool_bufs[i]->pool, pool);
+    ASSERT(pool_bufs[i] = ne_memory_pool_get_buf(pool));
+    ASSERT(pool_bufs[i]->used);
+    ASSERT(pool_bufs[i]->size == BLOCK_SIZE);
+    ASSERT(pool_bufs[i]->data);
+    ASSERT(pool_bufs[i]->type == POOL);
+    ASSERT_EQ(pool_bufs[i]->pool, pool);
   }
 
-  ck_assert(!ne_memory_pool_free(pool));
+  ASSERT(!ne_memory_pool_free(pool));
 
   ne_memory_buf_t *alloc_bufs[BLOCK_COUNT];
   for (int i = 0; i < BLOCK_COUNT; ++i) {
-    ck_assert_ptr_nonnull(alloc_bufs[i] = ne_memory_pool_get_buf(pool));
-    ck_assert(alloc_bufs[i]->used);
-    ck_assert(alloc_bufs[i]->size == BLOCK_SIZE);
-    ck_assert_ptr_nonnull(alloc_bufs[i]->data);
-    ck_assert(alloc_bufs[i]->type == ALLOC);
-    ck_assert_ptr_eq(alloc_bufs[i]->pool, pool);
+    ASSERT(alloc_bufs[i] = ne_memory_pool_get_buf(pool));
+    ASSERT(alloc_bufs[i]->used);
+    ASSERT(alloc_bufs[i]->size == BLOCK_SIZE);
+    ASSERT(alloc_bufs[i]->data);
+    ASSERT(alloc_bufs[i]->type == ALLOC);
+    ASSERT_EQ(alloc_bufs[i]->pool, pool);
   }
 
-  ck_assert(!ne_memory_pool_free(pool));
+  ASSERT(!ne_memory_pool_free(pool));
 
   for (int i = 0; i < BLOCK_COUNT; ++i) {
     ne_memory_buf_free(pool_bufs[i]);
@@ -52,40 +53,29 @@ START_TEST (memory_pool_buf) {
   }
 
   for (int i = 0; i < BLOCK_COUNT; ++i) {
-    ck_assert_ptr_nonnull(pool_bufs[i] = ne_memory_pool_get_buf(pool));
-    ck_assert(pool_bufs[i]->used);
-    ck_assert(pool_bufs[i]->size == BLOCK_SIZE);
-    ck_assert_ptr_nonnull(pool_bufs[i]->data);
-    ck_assert(pool_bufs[i]->type == POOL);
-    ck_assert_ptr_eq(pool_bufs[i]->pool, pool);
+    ASSERT(pool_bufs[i] = ne_memory_pool_get_buf(pool));
+    ASSERT(pool_bufs[i]->used);
+    ASSERT(pool_bufs[i]->size == BLOCK_SIZE);
+    ASSERT(pool_bufs[i]->data);
+    ASSERT(pool_bufs[i]->type == POOL);
+    ASSERT_EQ(pool_bufs[i]->pool, pool);
   }
 
-  ck_assert(!ne_memory_pool_free(pool));
+  ASSERT(!ne_memory_pool_free(pool));
 
   for (int i = 0; i < BLOCK_COUNT; ++i) {
     ne_memory_buf_free(pool_bufs[i]);
   }
 
-  ck_assert(ne_memory_pool_free(pool));
+  ASSERT(ne_memory_pool_free(pool));
+  PASS();
 }
-END_TEST
 
-Suite *build_suite() {
-  Suite *s;
-  TCase *init_case, *buf_case;
-
-  s = suite_create("Memory Pool");
-
-  init_case = tcase_create("Initialize pool");
-  tcase_add_test(init_case, memory_pool_init);
-
-  buf_case = tcase_create("Memory buffer");
-  tcase_add_test(buf_case, memory_pool_buf);
-
-  suite_add_tcase(s, init_case);
-  suite_add_tcase(s, buf_case);
-
-  return s;
+SUITE(suite) {
+  RUN_TEST(memory_pool_init);
+  RUN_TEST(memory_pool_buf);
 }
+
+GREATEST_MAIN_DEFS();
 
 TEST_MAIN

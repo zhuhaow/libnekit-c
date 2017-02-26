@@ -1,9 +1,6 @@
 enable_testing()
 
-set(LIBS compat check nekit)
-if (LINUX)
-  set(LIBS rt ${LIBS})
-endif()
+set(LIBS nekit)
 
 include_directories(include)
 

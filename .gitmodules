@@ -1,6 +1,3 @@
-[submodule "test/deps/check"]
-	path = test/deps/check
-	url = https://github.com/zhuhaow/check.git
 [submodule "deps/libuv"]
 	path = deps/libuv
 	url = https://github.com/libuv/libuv.git

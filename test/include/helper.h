@@ -1,7 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "check.h"
+#include "greatest.h"
 #include "mem.h"
 #include "uv.h"
 #include "error.h"
@@ -12,13 +12,9 @@
 
 #define TEST_MAIN                                                              \
   int main(int argc, char *argv[]) {                                           \
-    int number_failed;                                                         \
-    Suite *suite = build_suite();                                              \
-    SRunner *runner = srunner_create(suite);                                   \
-    srunner_run_all(runner, CK_NORMAL);                                        \
-    number_failed = srunner_ntests_failed(runner);                             \
-    srunner_free(runner);                                                      \
-    return number_failed;                                                      \
+    GREATEST_MAIN_BEGIN();                                                     \
+    RUN_SUITE(suite);                                                          \
+    GREATEST_MAIN_END();                                                       \
   }
 
 typedef struct {
