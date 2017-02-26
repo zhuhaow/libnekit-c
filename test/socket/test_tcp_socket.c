@@ -23,7 +23,7 @@ void on_connect1(ne_tcp_socket_t *socket) {
   // the corresponding server socket will close.
   connected = true;
   timer.data = socket;
-  uv_timer_start(&timer, timer_cb1, 0, 0);
+  uv_timer_start(&timer, timer_cb1, 50, 0);
 }
 
 START_TEST (connect_test) {
