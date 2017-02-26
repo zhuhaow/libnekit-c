@@ -25,6 +25,13 @@ cache:
   directories:
     - deps/deps_build
 
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      if [ "$CC" == "gcc" ]; then
+        export CC=$(ls -t /usr/local/bin/gcc-?.?);
+      fi
+    fi
+
 before_script:
   - if [ ! -d deps/deps_build/lib ]; then scripts/build_deps.sh; fi
 
