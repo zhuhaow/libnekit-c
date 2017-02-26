@@ -26,12 +26,14 @@ init:
   - 'echo Repo build commit is: %APPVEYOR_REPO_COMMIT%'
 
 before_build:
-  - cmd: vcbuild.bat release %platform% shared
+  - cd deps/libuv
+  - vcbuild.bat release %platform% shared
+  - cd ../..
   - ps: |
       md deps/deps_build/include
       md deps/deps_build/lib
       Copy-Item deps/libuv/include/* deps/deps_build/include
-      Copy-Item Debug/lib/* deps/deps_build/
+      Copy-Item deps/libuv/Debug/lib/* deps/deps_build/
 
 build_script:
   - ps: |
