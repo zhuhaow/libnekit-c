@@ -30,10 +30,6 @@ matrix:
     - compiler: gcc
       os: osx
 
-cache:
-  directories:
-    - deps/deps_build
-
 before_script:
   - if [ ! -d deps/deps_build/lib ]; then scripts/build_deps.sh; fi
 
