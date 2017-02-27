@@ -25,9 +25,10 @@ env:
     - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
       ARCH=x64
 
-exclude:
-  - compiler: gcc
-    os: osx
+matrix:
+  exclude:
+    - compiler: gcc
+      os: osx
 
 cache:
   directories:
