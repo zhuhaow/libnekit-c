@@ -1,7 +1,7 @@
 enable_testing()
 
 set(LIBS nekit)
-if (CMAKE_COMPILER_IS_GNUCC)
+if (UNIX AND NOT APPLE)
   set(CMAKE_THREAD_PREFER_PTHREAD ON)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
