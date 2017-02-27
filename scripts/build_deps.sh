@@ -18,10 +18,10 @@ cp -r include/* ../deps_build/include/
 if [ "$(uname)" == "Darwin" ]; then
     ./gyp_uv.py -f xcode
     if [ "$ARCH" == "x86" ]; then
-        xcodebuild -ARCHS="i386" -project uv.xcodeproj \
+        xcodebuild -ARCHS=i386 -project uv.xcodeproj \
                    -configuration Release -target All
     else
-        xcodebuild -ARCHS="x86_64" -project uv.xcodeproj \
+        xcodebuild -ARCHS=x86_64 -project uv.xcodeproj \
                    -configuration Release -target All
     fi
     pwd
