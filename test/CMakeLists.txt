@@ -1,6 +1,10 @@
 enable_testing()
 
 set(LIBS nekit)
+if (UNIX AND NOT APPLE)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  set(LIBS ${LIBS} pthread)
+endif()
 
 include_directories(include)
 

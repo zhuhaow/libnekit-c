@@ -12,6 +12,25 @@ else ()
   set (CMAKE_C_STANDARD 99)
 endif ()
 
+option(NEKIT_ARCHITECTURE "Compiling libnekit in 32 or 64 bit." "x64")
+if (NEKIT_ARCHITECTURE EQUAL "x86")
+  if (UNIX AND NOT APPLE)
+    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-m32")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-m32")
+    set(CMAKE_LD_FLAGS ${CMAKE_LD_FLAGS} "-m32")
+  else()
+    set(CMAKE_OSX_ARCHITECTURES "i386")
+  endif()
+else()
+  if (UNIX AND NOT APPLE)
+    # set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-m64")
+    # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-m64")
+    # set(CMAKE_LD_FLAGS ${CMAKE_LD_FLAGS} "-m64")
+  else()
+    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+  endif()
+endif()
+
 set(SOURCES
   src/utils/memory_pool.c
   # instance.c
