@@ -17,6 +17,7 @@ addons:
     packages:
       - valgrind
       - libc6-dev-i386
+      - gcc-multilib
 
 env:
   matrix:
