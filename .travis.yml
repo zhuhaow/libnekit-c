@@ -16,15 +16,10 @@ addons:
   apt:
     packages:
       - valgrind
-      - libc6-dev-i386
-      - gcc-multilib
 
 env:
   matrix:
     - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
-      ARCH=x86
-    - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
-      ARCH=x64
 
 matrix:
   exclude:
@@ -37,6 +32,6 @@ before_script:
 script:
   - mkdir build &&
     cd build &&
-    cmake $CMAKE_OPTIONS -DNEKIT_ARCH:STRING=$ARCH .. &&
+    cmake $CMAKE_OPTIONS .. &&
     cmake --build . 
   - ctest --output-on-failure
