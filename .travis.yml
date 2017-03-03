@@ -16,10 +16,16 @@ addons:
   apt:
     packages:
       - valgrind
+      - libc6-dev-i386
+      - linux-libc-dev
 
 env:
+  global:
+    - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
   matrix:
-    - CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
+    - ARCH="x86"
+    - ARCH="x64"
+
 
 matrix:
   exclude:
@@ -32,6 +38,6 @@ before_script:
 script:
   - mkdir build &&
     cd build &&
-    cmake $CMAKE_OPTIONS .. &&
+    cmake $SHARED_CMAKE_OPTIONS $CMAKE_OPTIONS -DNEKIT_ARCH=$ARCH .. &&
     cmake --build . 
   - ctest --output-on-failure
