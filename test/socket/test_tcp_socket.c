@@ -15,8 +15,8 @@ uv_timer_t timer;
 void timer_cb1(uv_timer_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
   ne_tcp_socket_close(socket);
-  uv_close(socket->context, NULL);
-  uv_close(handle, NULL);
+  uv_close((uv_handle_t *)&((server_t *)socket->context)->handle, NULL);
+  uv_close((uv_handle_t *)handle, NULL);
 }
 
 void on_connect1(ne_tcp_socket_t *socket) {
