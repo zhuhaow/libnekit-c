@@ -36,6 +36,6 @@ before_script:
 script:
   - mkdir build &&
     cd build &&
-    cmake $CMAKE_OPTIONS -DNEKIT_ARCHITECTURE=$ARCH .. &&
+    cmake $CMAKE_OPTIONS -DNEKIT_ARCH:STRING=$ARCH .. &&
     cmake --build . 
   - ctest --output-on-failure
