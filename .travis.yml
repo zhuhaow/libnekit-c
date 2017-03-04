@@ -16,14 +16,14 @@ addons:
   apt:
     packages:
       - valgrind
-      - libc6-dev-i386
-      - linux-libc-dev
+      # - libc6-dev-i386
+      # - linux-libc-dev:i386
 
 env:
   global:
     - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
   matrix:
-    - ARCH="x86"
+    # - ARCH="x86"
     - ARCH="x64"
 
 
