@@ -1,16 +1,21 @@
+#include "error.h"
 #include "greatest.h"
 #include "helper.h"
-#include "tcp_socket.h"
-#include "error.h"
 #include "mem.h"
+#include "tcp_socket.h"
 
 #include "uv.h"
 
 #include <stdio.h>
 
-
 bool connected;
 uv_timer_t timer;
+
+void set_up_env() { connected = false; }
+
+/* TEST CASE 1:
+   Connect than disconnect.
+ */
 
 void timer_cb1(uv_timer_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
@@ -26,7 +31,7 @@ void on_connect1(ne_tcp_socket_t *socket) {
   uv_timer_start(&timer, timer_cb1, 50, 0);
 }
 
-TEST connect_test() {
+TEST connect_test1() {
   uv_timer_init(uv_default_loop(), &timer);
 
   server_t server;
@@ -34,7 +39,6 @@ TEST connect_test() {
 
   ne_tcp_socket_t socket;
   ne_tcp_socket_init(uv_default_loop(), &socket);
-  connected = false;
 
   socket.context = &server;
   socket.on_connect = on_connect1;
@@ -63,7 +67,9 @@ TEST connect_test() {
 }
 
 SUITE(suite) {
-  RUN_TEST(connect_test);
+  SET_SETUP(set_up_env, NULL);
+
+  RUN_TEST(connect_test1);
 }
 
 GREATEST_MAIN_DEFS();
