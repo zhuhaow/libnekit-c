@@ -65,6 +65,8 @@ void free_buf(const uv_buf_t *buf) {
 }
 
 void server_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
+  uv_read_stop(stream);
+
   server_t *server = (server_t *)stream->data;
   if (nread < 0) {
     free_buf(buf);

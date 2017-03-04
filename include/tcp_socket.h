@@ -11,7 +11,7 @@ typedef struct ne_tcp_socket ne_tcp_socket_t;
 typedef void (*ne_tcp_socket_cb)(ne_tcp_socket_t *socket);
 typedef void (*ne_tcp_socket_status_cb)(ne_tcp_socket_t *socket, int status);
 typedef void (*ne_tcp_socket_alloc_cb)(ne_tcp_socket_t *socket, ne_buf_t *buf);
-typedef void (*ne_tcp_socket_read_cb)(ne_tcp_socket_t *socket, int nread, const ne_buf_t *buf);
+typedef void (*ne_tcp_socket_read_cb)(ne_tcp_socket_t *socket, ssize_t nread, const ne_buf_t *buf);
 
 enum ne_tcp_socket_status {
   /* The initial state of socket */
