@@ -28,7 +28,7 @@ if [ "$(uname)" == "Darwin" ]; then
     cp build/Release/libuv.a ../deps_build/lib/
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     if [ "$ARCH" == "x86" ]; then
-        ./gyp_uv.py -f make -Dtarget_arch=x32 -R libuv
+        ./gyp_uv.py -f make -Dtarget_arch=ia32 -R libuv
     else
         ./gyp_uv.py -f make -R libuv
     fi
