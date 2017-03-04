@@ -11,6 +11,8 @@
 bool connected;
 uv_timer_t timer;
 
+char hello_data[] = "hello";
+
 void set_up_env() { connected = false; }
 
 /* TEST CASE 1:
@@ -66,10 +68,74 @@ TEST connect_test1() {
   PASS();
 }
 
+/* TEST CASE 1 END */
+
+/* TEST CASE 2:
+   Connect, send "hello" then disconnect without read. Should send back RST.
+ */
+
+void timer_cb2(uv_timer_t *handle) {
+  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
+  ne_tcp_socket_close(socket);
+  uv_close((uv_handle_t *)&((server_t *)socket->context)->handle, NULL);
+  uv_close((uv_handle_t *)handle, NULL);
+}
+
+void on_connect2(ne_tcp_socket_t *socket) {
+  connected = true;
+  socket->write_buf.len = 5;
+  socket->write_buf.base = hello_data;
+  ne_tcp_socket_write(socket);
+}
+
+void on_write2(ne_tcp_socket_t *socket) {
+  timer.data = socket;
+  uv_timer_start(&timer, timer_cb1, 50, 0);
+}
+
+TEST connect_test2() {
+  uv_timer_init(uv_default_loop(), &timer);
+
+  server_t server;
+  start_server(&server, echo_server_conn_cb);
+
+  ne_tcp_socket_t socket;
+  ne_tcp_socket_init(uv_default_loop(), &socket);
+
+  socket.context = &server;
+  socket.on_connect = on_connect2;
+  socket.on_write = on_write2;
+
+  struct sockaddr_in addr;
+  assert(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
+  ne_tcp_socket_connect(&socket, (struct sockaddr *)&addr);
+
+  ASSERT_EQ(uv_run(uv_default_loop(), UV_RUN_DEFAULT), 0);
+
+  ASSERT_EQ(uv_loop_close(uv_default_loop()), 0);
+
+  ASSERT(connected);
+
+  ASSERT_EQ(server.listen_stat.socket_accept, 1);
+  ASSERT_EQ(server.listen_stat.last_error, 0);
+
+  ASSERT_EQ(server.socket_stat.last_error, UV_ECONNRESET);
+  ASSERT(server.socket_stat.alloc_count == 1 || server.socket_stat.alloc_count == 2);
+  ASSERT_EQ(server.socket_stat.read_count, 1);
+  ASSERT_EQ(server.socket_stat.bytes_read, 5);
+  ASSERT_EQ(server.socket_stat.write_count, 1);
+  ASSERT_EQ(server.socket_stat.bytes_write, 5);
+
+  PASS();
+}
+
+/* TEST CASE 2 END */
+
 SUITE(suite) {
   SET_SETUP(set_up_env, NULL);
 
   RUN_TEST(connect_test1);
+  RUN_TEST(connect_test2);
 }
 
 GREATEST_MAIN_DEFS();

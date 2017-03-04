@@ -86,7 +86,7 @@ void server_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
   assert(req);
   uv_buf_t *write_buf = ALLOC(uv_buf_t, 1);
   write_buf->base = buf->base;
-  write_buf->len = buf->len;
+  write_buf->len = nread;
   req->data = write_buf;
   uv_write(req, stream, write_buf, 1, server_write_cb);
 }
@@ -98,13 +98,14 @@ void server_write_cb(uv_write_t *req, int status) {
 
   assert(status == 0);
 
+  uv_stream_t *server_sock = req->handle;
+
   uv_buf_t *write_buf = (uv_buf_t *)req->data;
   server->socket_stat.bytes_write += write_buf->len;
   free(write_buf->base);
   free(write_buf);
   free(req);
 
-  uv_stream_t *server_sock = req->handle;
   uv_read_start(server_sock, vanilla_alloc_cb, server_read_cb);
 }
 
