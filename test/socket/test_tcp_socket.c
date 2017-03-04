@@ -72,6 +72,13 @@ TEST connect_test1() {
 
 /* TEST CASE 2:
    Connect, send "hello" then disconnect without read. Should send back RST.
+
+   I personally believe there is a bug in OS X (and maybe iOS) that the socket would
+   send FIN then RST, which is not correct, but reported here:
+   https://patchwork.kernel.org/patch/9210023/
+
+   Anyway, this behavior should not matter that much but we should definitely
+   keey that in mind.
  */
 
 void timer_cb2(uv_timer_t *handle) {
@@ -119,7 +126,9 @@ TEST connect_test2() {
   ASSERT_EQ(server.listen_stat.socket_accept, 1);
   ASSERT_EQ(server.listen_stat.last_error, 0);
 
+#ifndef __APPLE__
   ASSERT_EQ(server.socket_stat.last_error, UV_ECONNRESET);
+#endif
   ASSERT(server.socket_stat.alloc_count == 1 || server.socket_stat.alloc_count == 2);
   ASSERT_EQ(server.socket_stat.read_count, 1);
   ASSERT_EQ(server.socket_stat.bytes_read, 5);
