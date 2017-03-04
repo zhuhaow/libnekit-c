@@ -19,10 +19,10 @@ if [ "$(uname)" == "Darwin" ]; then
     ./gyp_uv.py -f xcode -R libuv
     if [ "$ARCH" == "x86" ]; then
         xcodebuild ARCHS=i386 ONLY_ACTIVE_ARCHS=NO -project uv.xcodeproj \
-                   -configuration Release -target All
+                   -configuration Release -target libuv
     else
         xcodebuild ARCHS=x86_64 ONLY_ACTIVE_ARCHS=NO -project uv.xcodeproj \
-                   -configuration Release -target All
+                   -configuration Release -target libuv
     fi
     pwd
     cp build/Release/libuv.a ../deps_build/lib/
