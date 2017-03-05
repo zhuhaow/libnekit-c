@@ -34,6 +34,8 @@ else()
   endif()
 endif()
 
+unset(CMAKE_OSX_DEPLOYMENT_TARGET)
+
 include(CheckCCompilerFlag)
 
 function(enable_c_compiler_flag_if_supported flag)
