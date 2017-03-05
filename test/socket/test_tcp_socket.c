@@ -6,6 +6,9 @@
 
 #include "uv.h"
 
+#include "config.h"
+#include "assert.h"
+
 #include <stdio.h>
 
 bool connected;
@@ -46,7 +49,7 @@ TEST connect_test1() {
   socket.on_connect = on_connect1;
 
   struct sockaddr_in addr;
-  assert(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
+  NE_ASSERT(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
   ne_tcp_socket_connect(&socket, (struct sockaddr *)&addr);
 
   ASSERT_EQ(uv_run(uv_default_loop(), UV_RUN_DEFAULT), 0);
@@ -96,7 +99,7 @@ void on_connect2(ne_tcp_socket_t *socket) {
   ne_tcp_socket_write(socket);
 }
 
-void on_write2(ne_tcp_socket_t *socket) {
+void on_write2(ne_tcp_socket_t *socket, ne_tcp_socket_write_err UNUSED(err)) {
   timer.data = socket;
   uv_timer_start(&timer, timer_cb1, 50, 0);
 }
@@ -115,7 +118,7 @@ TEST connect_test2() {
   socket.on_write = on_write2;
 
   struct sockaddr_in addr;
-  assert(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
+  NE_ASSERT(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
   ne_tcp_socket_connect(&socket, (struct sockaddr *)&addr);
 
   ASSERT_EQ(uv_run(uv_default_loop(), UV_RUN_DEFAULT), 0);
@@ -164,11 +167,11 @@ void on_connect3(ne_tcp_socket_t *socket) {
   ne_tcp_socket_read_start(socket);
 }
 
-void on_write3(ne_tcp_socket_t *socket) {}
+void on_write3(ne_tcp_socket_t *UNUSED(socket), ne_tcp_socket_write_err UNUSED(err)) {}
 
 void on_read3(ne_tcp_socket_t *socket, ssize_t nread, const ne_buf_t *buf) {
-  assert(nread == 5);
-  assert(!memcmp(buf->base, hello_data, 5));
+  NE_ASSERT(nread == 5);
+  NE_ASSERT(!memcmp(buf->base, hello_data, 5));
   free(buf->base);
   if (current_round < max_round) {
     current_round++;
@@ -179,7 +182,7 @@ void on_read3(ne_tcp_socket_t *socket, ssize_t nread, const ne_buf_t *buf) {
   }
 }
 
-void alloc_cb3(ne_tcp_socket_t *socket, ne_buf_t *buf) {
+void alloc_cb3(ne_tcp_socket_t *UNUSED(socket), ne_buf_t *buf) {
   buf->base = malloc(30);
   buf->len = 30;
 }
@@ -200,7 +203,7 @@ TEST connect_test3() {
   socket.alloc_cb = alloc_cb3;
 
   struct sockaddr_in addr;
-  assert(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
+  NE_ASSERT(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
   ne_tcp_socket_connect(&socket, (struct sockaddr *)&addr);
 
   ASSERT_EQ(uv_run(uv_default_loop(), UV_RUN_DEFAULT), 0);

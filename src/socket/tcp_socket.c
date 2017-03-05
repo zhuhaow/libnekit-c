@@ -1,10 +1,10 @@
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
 
-#include "tcp_socket.h"
+#include "assert.h"
 #include "config.h"
+#include "tcp_socket.h"
 
 void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket) {
   memset(socket, 0, sizeof(ne_tcp_socket_t));
@@ -19,29 +19,30 @@ void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket) {
   socket->timeout = SOCKET_TIMEOUT;
 }
 
-void __tcp_socket_timeout_cb(uv_timer_t *handle) {
+/* MARK: Timeout related. */
+void __ne_tcp_socket_timeout_cb(uv_timer_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
   if (socket->on_error)
-    socket->on_error(socket, UV_ETIMEDOUT);
+    socket->on_error(socket, NE_TCP_TIMEOUT);
   ne_tcp_socket_close(socket);
 }
 
-void __tcp_socket_timer_reset(ne_tcp_socket_t *socket) {
-  uv_timer_again(&socket->timeout_timer);
+void __ne_tcp_socket_timer_reset(ne_tcp_socket_t *socket) {
+  if (socket->timeout > 0)
+    uv_timer_again(&socket->timeout_timer);
 }
 
-void __tcp_socket_timer_start(ne_tcp_socket_t *socket) {
+void __ne_tcp_socket_timer_start(ne_tcp_socket_t *socket) {
   if (socket->timeout > 0)
-    uv_timer_start(&socket->timeout_timer, __tcp_socket_timeout_cb,
+    uv_timer_start(&socket->timeout_timer, __ne_tcp_socket_timeout_cb,
                    socket->timeout, socket->timeout);
 }
 
-void __tcp_socket_timer_stop(ne_tcp_socket_t *socket) {
+void __ne_tcp_socket_timer_stop(ne_tcp_socket_t *socket) {
   uv_timer_stop(&socket->timeout_timer);
 }
 
-
-void __tcp_socket_check_close(ne_tcp_socket_t *socket) {
+void __ne_tcp_socket_check_close(ne_tcp_socket_t *socket) {
   if (socket->timer_closed && socket->socket_closed) {
     socket->status = CLOSED;
     if (socket->on_close)
@@ -49,30 +50,32 @@ void __tcp_socket_check_close(ne_tcp_socket_t *socket) {
   }
 }
 
-void __tcp_socket_socket_close_cb(uv_handle_t *handle) {
-  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
-  socket->socket_closed = true;
-  __tcp_socket_check_close(socket);
-}
-
-void __tcp_socket_timer_close_cb(uv_handle_t *handle) {
+void __ne_tcp_socket_timer_close_cb(uv_handle_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
   socket->timer_closed = true;
-  __tcp_socket_check_close(socket);
+  __ne_tcp_socket_check_close(socket);
+}
+
+void __ne_tcp_socket_socket_close_cb(uv_handle_t *handle) {
+  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
+  socket->socket_closed = true;
+  __ne_tcp_socket_check_close(socket);
 }
 
 void ne_tcp_socket_close(ne_tcp_socket_t *socket) {
   socket->status = CLOSING;
-  uv_close((uv_handle_t *)&socket->timeout_timer, __tcp_socket_timer_close_cb);
-  uv_close((uv_handle_t *)&socket->handle, __tcp_socket_socket_close_cb);
+  uv_close((uv_handle_t *)&socket->timeout_timer,
+           __ne_tcp_socket_timer_close_cb);
+  uv_close(&socket->handle.handle, __ne_tcp_socket_socket_close_cb);
 }
 
 /* Return true when the error is handled and the caller should just return.
    Return false when there is no error or the caller should handle it. */
-bool __tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
-  if (status > 0)
+bool __ne_tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
+  if (status >= 0)
     return false;
 
+  /* Closing socket should only expect to receive closed callback. */
   if (socket->status >= CLOSING)
     return true;
 
@@ -83,113 +86,141 @@ bool __tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
   case UV_ECONNRESET:
   case UV_ENETDOWN:
   case UV_ENETUNREACH:
-    socket->on_error(socket, status);
+    if (socket->on_error)
+      socket->on_error(socket, status);
     ne_tcp_socket_close(socket);
     return true;
   case UV_ECANCELED:
-    /* This should only happen when the socket is closing, which is already checked. */
-    assert(false);
+    /* This should only happen when the socket is closing, which is already
+     * checked. */
+    NE_ASSERT(false);
   }
   return false;
 }
 
 void ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
   socket->status = CONNECTED;
-  __tcp_socket_timer_start(socket);
+  __ne_tcp_socket_timer_start(socket);
 }
 
-int ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr) {
-  return uv_tcp_bind(&socket->handle.tcp, addr, 0);
+void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr) {
+  NE_ASSERT(!uv_tcp_bind(&socket->handle.tcp, addr, 0));
 }
 
-void __tcp_socket_connect_cb(uv_connect_t *req, int status) {
+void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)req->handle->data;
 
-  if (__tcp_socket_handle_error(socket, status))
+  if (__ne_tcp_socket_handle_error(socket, status))
     return;
 
-  assert(status == 0);
+  NE_ASSERT(status == 0);
+
+  __ne_tcp_socket_timer_reset(socket);
 
   socket->on_connect(socket);
 }
 
-int ne_tcp_socket_connect(ne_tcp_socket_t *socket, struct sockaddr *addr) {
-  int r;
-
-  r = uv_tcp_connect(&socket->connect_req, &socket->handle.tcp, addr,
-                     __tcp_socket_connect_cb);
-  if (!r)
+ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
+                                                struct sockaddr *addr) {
+  int r = uv_tcp_connect(&socket->connect_req, &socket->handle.tcp, addr,
+                         __ne_tcp_socket_connect_cb);
+  if (!r) {
     socket->status = CONNECTING;
-
-  return r;
-}
-
-void ne_tcp_socket_read_stop(ne_tcp_socket_t *socket) {
-  socket->reading = false;
-  uv_read_stop((uv_stream_t *)&socket->handle);
-}
-
-void __tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
-  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)stream->data;
-
-  if (__tcp_socket_handle_error(socket, nread))
-    return;
-
-  __tcp_socket_timer_reset(socket);
-
-  if (nread == UV_EOF) {
-    socket->receiveEOF = true;
-    ne_tcp_socket_read_stop(socket);
-  } else {
-    assert(nread >= 0);
+    __ne_tcp_socket_timer_start(socket);
+    return NE_TCP_CNOERR;
   }
 
-  socket->on_read(socket, nread, buf);
+  switch (r) {
+  case UV_EADDRINUSE:
+    return NE_TCP_CEADDRINUSE;
+  default:
+    NE_ASSERT(false);
+    return r;
+  }
 }
 
-void __tcp_socket_alloc_cb(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+/* MARK: Read related */
+void ne_tcp_socket_read_stop(ne_tcp_socket_t *socket) {
+  socket->reading = false;
+  uv_read_stop(&socket->handle.stream);
+}
+
+void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
+                             const uv_buf_t *buf) {
+  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)stream->data;
+
+  if (__ne_tcp_socket_handle_error(socket, nread)) {
+    socket->reading = false;
+    if (socket->on_read)
+      socket->on_read(socket, NE_TCP_RERR, buf);
+    return;
+  }
+
+  if (nread >= 0)
+    __ne_tcp_socket_timer_reset(socket);
+
+  if (nread == UV_EOF) {
+    socket->reading = false;
+    socket->receiveEOF = true;
+    ne_tcp_socket_read_stop(socket);
+    if (socket->on_read)
+      socket->on_read(socket, NE_TCP_REOF, buf);
+    return;
+  } else {
+    NE_ASSERT(nread >= 0);
+    if (socket->on_read)
+      socket->on_read(socket, nread, buf);
+  }
+}
+
+void __ne_tcp_socket_alloc_cb(uv_handle_t *handle, size_t UNUSED(suggested_size),
+                              uv_buf_t *buf) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
 
   socket->alloc_cb(socket, buf);
 }
 
 int ne_tcp_socket_read_start(ne_tcp_socket_t *socket) {
+  NE_ASSERT(socket->status <= SHUT_DOWN);
+  NE_ASSERT(!socket->receiveEOF);
   socket->reading = true;
-  return uv_read_start(&socket->handle.stream, __tcp_socket_alloc_cb,
-                __tcp_socket_read_cb);
+  return uv_read_start(&socket->handle.stream, __ne_tcp_socket_alloc_cb,
+                       __ne_tcp_socket_read_cb);
 }
 
-void __tcp_socket_write_cb(uv_write_t *req, int status) {
+void __ne_tcp_socket_write_cb(uv_write_t *req, int status) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)req->handle->data;
-  if (__tcp_socket_handle_error(socket, status))
+  if (__ne_tcp_socket_handle_error(socket, status)) {
+    socket->on_write(socket, NE_TCP_WERR);
     return;
+  }
 
-  assert(status == 0);
-  socket->on_write(socket);
+  NE_ASSERT(status == 0);
+  socket->on_write(socket, NE_TCP_WNOERR);
 }
 
 void ne_tcp_socket_write(ne_tcp_socket_t *socket) {
-  uv_write(&socket->write_req, &socket->handle.stream,
-           &socket->write_buf, 1, __tcp_socket_write_cb);
+  NE_ASSERT(socket->status < SHUTTING_DOWN);
+  uv_write(&socket->write_req, &socket->handle.stream, &socket->write_buf, 1,
+           __ne_tcp_socket_write_cb);
 }
 
-void __tcp_socket_shutdown_cb(uv_shutdown_t *req, int status) {
+void __ne_tcp_socket_shutdown_cb(uv_shutdown_t *req, int status) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)req->handle->data;
-  if (__tcp_socket_handle_error(socket, status))
+  if (__ne_tcp_socket_handle_error(socket, status))
     return;
 
-  assert(status == 0);
+  NE_ASSERT(status == 0);
   socket->status = SHUT_DOWN;
   socket->on_shutdown(socket);
 }
 void ne_tcp_socket_shutdown(ne_tcp_socket_t *socket) {
-  assert(socket->status == CONNECTING || socket->status == CONNECTED);
+  NE_ASSERT(socket->status == CONNECTING || socket->status == CONNECTED);
   socket->status = SHUTTING_DOWN;
   uv_shutdown(&socket->shutdown_req, &socket->handle.stream,
-              __tcp_socket_shutdown_cb);
+              __ne_tcp_socket_shutdown_cb);
 }
 
-void ne_tcp_socket_free(ne_tcp_socket_t *socket) {
-  assert(socket->status == CLOSED);
-  free(socket);
+void ne_tcp_socket_deinit(ne_tcp_socket_t *socket) {
+  NE_ASSERT(socket->status == CLOSED);
 }
