@@ -1,6 +1,6 @@
 #include "memory_pool.h"
 #include "mem.h"
-#include <assert.h>
+#include "assert.h"
 
 ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
                      size_t block_count) {
@@ -22,7 +22,7 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
 
   SLIST_INIT(&pool->unused_list);
 
-  for (int i = 0; i < block_count; ++i) {
+  for (size_t i = 0; i < block_count; ++i) {
     ne_memory_buf_t *buf = pool->bufs + i;
     buf->data = (char *)pool->pool_data + i * block_size;
     buf->size = block_size;
@@ -73,7 +73,7 @@ void ne_memory_buf_free(ne_memory_buf_t *buf) {
     return;
   }
 
-  assert(buf->type == POOL);
+  NE_ASSERT(buf->type == POOL);
 
   buf->used = false;
   SLIST_INSERT_HEAD(&buf->pool->unused_list, buf, pointer);
@@ -83,7 +83,7 @@ bool __memory_pool_used(ne_memory_pool_t *pool) {
   if (pool->alloc_bufs)
     return true;
 
-  for (int i = 0; i < pool->block_count; ++i) {
+  for (size_t i = 0; i < pool->block_count; ++i) {
     if (pool->bufs[i].used)
       return true;
   }
