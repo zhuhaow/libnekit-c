@@ -1,5 +1,5 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef NE_TYPES_H_
+#define NE_TYPES_H_
 
 #include <stddef.h>
 #include <uv.h>

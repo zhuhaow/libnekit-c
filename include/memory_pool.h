@@ -1,5 +1,5 @@
-#ifndef MEMORY_POOL_H_
-#define MEMORY_POOL_H_
+#ifndef NE_MEMORY_POOL_H_
+#define NE_MEMORY_POOL_H_
 
 #include "error.h"
 #include "queue.h"

@@ -1,5 +1,5 @@
-#ifndef MEM_H
-#define MEM_H
+#ifndef NE_MEM_H
+#define NE_MEM_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -8,4 +8,4 @@
 
 #define MEMSET(p,n) memset(p, 0, sizeof(*p) * n);
 
-#endif /* MEM_H */
+#endif /* NE_MEM_H */
