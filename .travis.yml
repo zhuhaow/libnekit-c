@@ -10,7 +10,7 @@ compiler:
 dist: trusty
 sudo: false
 
-osx_image: xcode8
+osx_image: xcode8.2
 
 addons:
   apt:
