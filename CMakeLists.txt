@@ -53,6 +53,11 @@ if(HAS_PEDANTIC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "COVERAGE")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+  set(CMAKE_LINK_LIBRARY_FLAG "${CMAKE_LINK_LIBRARY_FLAG} --coverage")
+endif()
+
 set(SOURCES
   src/utils/memory_pool.c
   # instance.c

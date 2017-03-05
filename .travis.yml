@@ -21,7 +21,7 @@ addons:
 
 env:
   global:
-    - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
+    - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=COVERAGE"
   matrix:
     # - ARCH="x86"
     - ARCH="x64"
@@ -41,3 +41,6 @@ script:
     cmake $SHARED_CMAKE_OPTIONS $CMAKE_OPTIONS -DNEKIT_ARCH=$ARCH .. &&
     cmake --build . 
   - ctest --output-on-failure
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
