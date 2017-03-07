@@ -17,7 +17,7 @@ cp -r include/* ../deps_build/include/
 
 if [ "$(uname)" == "Darwin" ]; then
     ./gyp_uv.py -f xcode -R libuv
-    if [ "$ARCH" == "x86" ]; then
+    if [ "$ARCH" == "x32" ]; then
         xcodebuild ARCHS=i386 ONLY_ACTIVE_ARCHS=NO -project uv.xcodeproj \
                    -configuration Release -target libuv
     else
@@ -27,7 +27,9 @@ if [ "$(uname)" == "Darwin" ]; then
     pwd
     cp build/Release/libuv.a ../deps_build/lib/
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    if [ "$ARCH" == "x86" ]; then
+    if [ "$ARCH" == "x32" ]; then
+        ./gyp_uv.py -f make -Dtarget_arch=x32 -R libuv
+    elif [ "$ARCH" == "ia32" ]; then
         ./gyp_uv.py -f make -Dtarget_arch=ia32 -R libuv
     else
         ./gyp_uv.py -f make -R libuv

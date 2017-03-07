@@ -16,14 +16,15 @@ addons:
   apt:
     packages:
       - valgrind
-      # - libc6-dev-i386
+      - libc6-dev-i386
+      - gcc-multilib
       # - linux-libc-dev:i386
 
 env:
   global:
     - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=COVERAGE"
   matrix:
-    # - ARCH="x86"
+    - ARCH="x32"
     - ARCH="x64"
 
 
@@ -31,6 +32,9 @@ matrix:
   exclude:
     - compiler: gcc
       os: osx
+    - compiler: clang
+      env: ARCH="x32"
+      os: linux
 
 before_script:
   - if [ ! -d deps/deps_build/lib ]; then scripts/build_deps.sh; fi

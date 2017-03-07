@@ -22,7 +22,7 @@ find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 set(CTEST_MEMORYCHECK_COMMAND_OPTIONS --trace-children=yes --leak-check=full)
 
 function(add_mem_test name)
-  if (CTEST_MEMORYCHECK_COMMAND AND NE_ENABLE_MEMCHECK)
+  if (CTEST_MEMORYCHECK_COMMAND AND NE_ENABLE_MEMCHECK AND "${NEKIT_ARCH}" STREQUAL "x64")
     message(STATUS "Adding valgrind test for ${name}.")
     set(MEMCHECK_PARAMS ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} $<TARGET_FILE:${name}>)
     add_test(NAME ${name} COMMAND ${MEMCHECK_PARAMS})
