@@ -8,7 +8,8 @@
 typedef ssize_t ne_tcp_socket_err;
 #define NE_TCP_NOERR 0
 #define NE_TCP_ERST -1
-#define NE_TCP_TIMEOUT -2
+#define NE_TCP_ETIMEOUT -2
+#define NE_TCP_ENETUNREACH -3
 
 typedef ne_tcp_socket_err ne_tcp_socket_read_err;
 #define NE_TCP_RNOERR 0
@@ -22,6 +23,7 @@ typedef ne_tcp_socket_err ne_tcp_socket_write_err;
 typedef ne_tcp_socket_err ne_tcp_socket_connect_err;
 #define NE_TCP_CNOERR 0
 #define NE_TCP_CEADDRINUSE -1
+#define NE_TCP_CENETUNREACH NE_TCP_ENETUNREACH
 
 struct ne_tcp_socket;
 typedef struct ne_tcp_socket ne_tcp_socket_t;

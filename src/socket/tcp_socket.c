@@ -23,7 +23,7 @@ void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket) {
 void __ne_tcp_socket_timeout_cb(uv_timer_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
   if (socket->on_error)
-    socket->on_error(socket, NE_TCP_TIMEOUT);
+    socket->on_error(socket, NE_TCP_ETIMEOUT);
   ne_tcp_socket_close(socket);
 }
 
@@ -83,11 +83,18 @@ bool __ne_tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
   case UV_EOF:
     return false;
   case UV_ETIMEDOUT:
+    if (socket->on_error)
+      socket->on_error(socket, NE_TCP_ETIMEOUT);
+    ne_tcp_socket_close(socket);
+    return true;
   case UV_ECONNRESET:
-  case UV_ENETDOWN:
+    if (socket->on_error)
+      socket->on_error(socket, NE_TCP_ERST);
+    ne_tcp_socket_close(socket);
+    return true;
   case UV_ENETUNREACH:
     if (socket->on_error)
-      socket->on_error(socket, status);
+      socket->on_error(socket, NE_TCP_ENETUNREACH);
     ne_tcp_socket_close(socket);
     return true;
   case UV_ECANCELED:
@@ -95,6 +102,8 @@ bool __ne_tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
      * checked. */
     NE_ASSERT(false);
   }
+  /* Catch all other errors as of now so we know what we should handle but missing. */
+  NE_ASSERT(false);
   return false;
 }
 
@@ -133,6 +142,8 @@ ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
   switch (r) {
   case UV_EADDRINUSE:
     return NE_TCP_CEADDRINUSE;
+  case UV_ENETUNREACH:
+    return NE_TCP_CENETUNREACH;
   default:
     NE_ASSERT(false);
     return r;
