@@ -228,12 +228,32 @@ TEST connect_test3() {
 
 /* TEST CASE 3 END */
 
+/* TEST CASE 4: Try to bind the same address and port to multiple tcp socket. */
+TEST bind_test1() {
+  ne_tcp_socket_t socket1, socket2;
+  ne_tcp_socket_init(uv_default_loop(), &socket1);
+  ne_tcp_socket_init(uv_default_loop(), &socket2);
+
+  struct sockaddr_in addr;
+  ASSERT(uv_ip4_addr("127.0.0.1", TEST_PORT, &addr) == 0);
+  ne_tcp_socket_bind(&socket1, (struct sockaddr *)&addr);
+  ne_tcp_socket_bind(&socket2, (struct sockaddr *)&addr);
+
+  ne_tcp_socket_close(&socket1);
+  ne_tcp_socket_close(&socket2);
+
+  PASS();
+}
+
+/* TEST CASE 4 END */
+
 SUITE(suite) {
   SET_SETUP(set_up_env, NULL);
 
   RUN_TEST(connect_test1);
   RUN_TEST(connect_test2);
   RUN_TEST(connect_test3);
+  RUN_TEST(bind_test1);
 }
 
 GREATEST_MAIN_DEFS();

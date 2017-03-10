@@ -113,6 +113,7 @@ void ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
 }
 
 void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr) {
+  /* The addr in use error is always delayed. */
   NE_ASSERT(!uv_tcp_bind(&socket->handle.tcp, addr, 0));
 }
 
