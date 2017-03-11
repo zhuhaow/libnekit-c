@@ -102,19 +102,38 @@ bool __ne_tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
      * checked. */
     NE_ASSERT(false);
   }
-  /* Catch all other errors as of now so we know what we should handle but missing. */
+  /* Catch all other errors as of now so we know what we should handle but
+   * missing. */
   NE_ASSERT(false);
   return false;
-}
-
-void ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
-  socket->status = CONNECTED;
-  __ne_tcp_socket_timer_start(socket);
 }
 
 void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr) {
   /* The addr in use error is always delayed. */
   NE_ASSERT(!uv_tcp_bind(&socket->handle.tcp, addr, 0));
+}
+
+void __ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
+  socket->status = CONNECTED;
+  __ne_tcp_socket_timer_start(socket);
+}
+
+void __ne_tcp_socket_connection_cb(uv_stream_t *listen_stream, int status) {
+  NE_ASSERT(status == 0);
+
+  ne_tcp_socket_t *socket = (ne_tcp_socket_t *)listen_stream->data;
+  ne_tcp_socket_t *accepted_socket = socket->connection_alloc(socket);
+  ne_tcp_socket_init(socket->handle.tcp.loop, accepted_socket);
+
+  NE_ASSERT(uv_accept(listen_stream, &accepted_socket->handle.stream));
+  __ne_tcp_socket_accepted(accepted_socket);
+
+  socket->on_connection(socket, accepted_socket);
+}
+
+void ne_tcp_socket_listen(ne_tcp_socket_t *socket, int backlog) {
+  NE_ASSERT(uv_listen(&socket->handle.stream, backlog,
+                      __ne_tcp_socket_connection_cb));
 }
 
 void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
@@ -185,8 +204,8 @@ void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
   }
 }
 
-void __ne_tcp_socket_alloc_cb(uv_handle_t *handle, size_t UNUSED(suggested_size),
-                              uv_buf_t *buf) {
+void __ne_tcp_socket_alloc_cb(uv_handle_t *handle,
+                              size_t UNUSED(suggested_size), uv_buf_t *buf) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
 
   socket->alloc_cb(socket, buf);

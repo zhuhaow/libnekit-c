@@ -35,6 +35,12 @@ typedef void (*ne_tcp_socket_alloc_cb)(ne_tcp_socket_t *socket, ne_buf_t *buf);
 typedef void (*ne_tcp_socket_read_cb)(ne_tcp_socket_t *socket, ssize_t nread,
                                       const ne_buf_t *buf);
 
+typedef void (*ne_tcp_socket_connection_cb)(ne_tcp_socket_t *listen_socket,
+                                            ne_tcp_socket_t *accepted_socket);
+
+typedef ne_tcp_socket_t *(*ne_tcp_socket_connection_alloc)(
+    ne_tcp_socket_t *listen_socket);
+
 enum ne_tcp_socket_status {
   /* The initial state of socket */
   INVALID = 0,
@@ -104,6 +110,12 @@ struct ne_tcp_socket {
    * the default. Set it to 0 to disable time out. */
   uint64_t timeout;
 
+  /* A new connection is accepted from a listening socket. */
+  ne_tcp_socket_connection_cb on_connection;
+  /* It is expected this method return an allocated memory for a new
+   * `ne_tcp_socket_t`. */
+  ne_tcp_socket_connection_alloc connection_alloc;
+
   /* Private */
   uv_connect_t connect_req;
   uv_write_t write_req;
@@ -117,15 +129,15 @@ struct ne_tcp_socket {
 /* Initialize a new tcp socket on event loop. */
 void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket);
 
-/* Set up the socket if the socket is accepted from a listening socket,
-   instead of connecting actively. */
-void ne_tcp_socket_accepted(ne_tcp_socket_t *socket);
-
 /* Bind the socket to some address. */
 void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr);
 
+/* Start listen on the bind address. */
+void ne_tcp_socket_listen(ne_tcp_socket_t *socket, int backlog);
+
 /* Connect to remote address. */
-ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket, struct sockaddr *addr);
+ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
+                                                struct sockaddr *addr);
 
 /* Start reading data, `on_read` will be called if there is data available. */
 int ne_tcp_socket_read_start(ne_tcp_socket_t *socket);
