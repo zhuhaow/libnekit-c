@@ -70,7 +70,7 @@ set(SOURCES
   # instance.c
   # server/tcp_server.c
   # socket/tcp_listen_socket.c
-  src/socket/tcp_socket.c
+  src/utils/tcp_socket.c
   # src/socket/proxy/sock5_socket.c
   )
 
