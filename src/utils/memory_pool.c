@@ -1,9 +1,9 @@
 #include "memory_pool.h"
-#include "mem.h"
 #include "assert.h"
+#include "mem.h"
 
 ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
-                     size_t block_count) {
+                                  size_t block_count) {
   // overflow is not checked, make sure block_size * block_count will not
   // overflow
   MEMSET(pool, 1);
@@ -35,7 +35,8 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
   return 0;
 }
 
-ne_memory_buf_t *__memory_buf_create(size_t size, ne_memory_pool_t *pool) {
+static ne_memory_buf_t *__memory_buf_create(size_t size,
+                                            ne_memory_pool_t *pool) {
   ne_memory_buf_t *buf = (ne_memory_buf_t *)calloc(sizeof(ne_memory_buf_t), 1);
   if (!buf)
     return NULL;
@@ -79,7 +80,7 @@ void ne_memory_buf_free(ne_memory_buf_t *buf) {
   SLIST_INSERT_HEAD(&buf->pool->unused_list, buf, pointer);
 }
 
-bool __memory_pool_used(ne_memory_pool_t *pool) {
+static bool __memory_pool_used(ne_memory_pool_t *pool) {
   if (pool->alloc_bufs)
     return true;
 
