@@ -112,3 +112,4 @@ dkms.conf
 build/
 dev_header/
 deps/deps_build/
+cscope.files
