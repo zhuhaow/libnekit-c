@@ -1,4 +1,5 @@
 #include "memory_pool.h"
+#include "log.h"
 #include "ne_assert.h"
 #include "ne_mem.h"
 
@@ -10,15 +11,19 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
 
   pool->pool_size = block_count * block_size;
   pool->pool_data = calloc(pool->pool_size, 1);
-  if (!pool->pool_data)
+  if (!pool->pool_data) {
+    NELOG(NELOG_ERROR, "No enough memory for memory pool.");
     return NE_ENOMEM;
+  }
 
   pool->block_count = block_count;
   pool->block_size = block_size;
 
-  if (!pool->bufs)
   pool->bufs = NEALLOC(ne_memory_buf_t, pool->block_count);
+  if (!pool->bufs) {
+    NELOG(NELOG_ERROR, "No enough memory for memory pool bufs.");
     return NE_ENOMEM;
+  }
 
   SLIST_INIT(&pool->unused_list);
 
@@ -32,18 +37,24 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
     SLIST_INSERT_HEAD(&pool->unused_list, buf, pointer);
   }
 
+  NELOG(NELOG_DEBUG, "Successfully initialized memory pool.");
+
   return 0;
 }
 
 static ne_memory_buf_t *__memory_buf_create(size_t size,
                                             ne_memory_pool_t *pool) {
   ne_memory_buf_t *buf = (ne_memory_buf_t *)calloc(sizeof(ne_memory_buf_t), 1);
-  if (!buf)
+  if (!buf) {
+    NELOG(NELOG_ERROR, "No enough memory for new memory buf.");
     return NULL;
+  }
 
   buf->data = calloc(size, 1);
-  if (!buf->data)
+  if (!buf->data) {
+    NELOG(NELOG_ERROR, "No enough memory for new memory buf.");
     return NULL;
+  }
 
   buf->type = ALLOC;
   buf->size = size;
@@ -51,6 +62,8 @@ static ne_memory_buf_t *__memory_buf_create(size_t size,
   buf->used = true;
 
   pool->alloc_bufs++;
+
+  NELOG(NELOG_DEBUG, "Successfully created new memory buf.");
 
   return buf;
 }
@@ -92,11 +105,17 @@ static bool __memory_pool_used(ne_memory_pool_t *pool) {
 }
 
 bool ne_memory_pool_free(ne_memory_pool_t *pool) {
-  if (__memory_pool_used(pool))
+  if (__memory_pool_used(pool)) {
+    NELOG(NELOG_WARNING,
+          "Failed to free memory pool, some bufs are still in use.");
     return false;
+  }
 
   free(pool->pool_data);
   free(pool->bufs);
   free(pool);
+
+  NELOG(NELOG_DEBUG, "Successfully freed memory pool.");
+
   return true;
 }

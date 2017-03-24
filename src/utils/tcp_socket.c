@@ -3,6 +3,7 @@
 #include <uv.h>
 
 #include "config.h"
+#include "log.h"
 #include "ne_assert.h"
 #include "ne_mem.h"
 #include "tcp_socket.h"
@@ -23,6 +24,9 @@ void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket) {
 /* MARK: Timeout related. */
 static void __ne_tcp_socket_timeout_cb(uv_timer_t *handle) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)handle->data;
+
+  NELOG(NELOG_WARNING, "TCP socket timed out.");
+
   if (socket->on_error)
     socket->on_error(socket, NE_TCP_ETIMEOUT);
   ne_tcp_socket_close(socket);
@@ -46,8 +50,10 @@ static void __ne_tcp_socket_timer_stop(ne_tcp_socket_t *socket) {
 static void __ne_tcp_socket_check_close(ne_tcp_socket_t *socket) {
   if (socket->timer_closed && socket->socket_closed) {
     socket->status = CLOSED;
-    if (socket->on_close)
+    if (socket->on_close) {
+      NELOG(NELOG_DEBUG, "TCP socket closed.");
       socket->on_close(socket);
+    }
   }
 }
 
@@ -65,6 +71,9 @@ static void __ne_tcp_socket_socket_close_cb(uv_handle_t *handle) {
 
 void ne_tcp_socket_close(ne_tcp_socket_t *socket) {
   socket->status = CLOSING;
+
+  NELOG(NELOG_DEBUG, "Closing tcp socket.");
+
   uv_close((uv_handle_t *)&socket->timeout_timer,
            __ne_tcp_socket_timer_close_cb);
   uv_close(&socket->handle.handle, __ne_tcp_socket_socket_close_cb);

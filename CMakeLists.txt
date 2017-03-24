@@ -71,6 +71,7 @@ set(SOURCES
   # server/tcp_server.c
   # socket/tcp_listen_socket.c
   src/utils/tcp_socket.c
+  src/utils/log.c
   # src/socket/proxy/sock5_socket.c
   )
 
