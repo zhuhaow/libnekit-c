@@ -1,11 +1,13 @@
 #ifndef NE_ASSERT_H
 #define NE_ASSERT_H
 
+
 #ifndef NDEBUG
 
 #include <stdio.h>
+#include <stdlib.h>
 
-static int default_handler(const char *expr, const char *file, int line,
+static inline int default_handler(const char *expr, const char *file, int line,
                            const char *msg) {
   fprintf(stderr, "Assertion failed on %s line %d: %s\n", file, line, expr);
   if (msg != NULL)
@@ -22,6 +24,11 @@ static int default_handler(const char *expr, const char *file, int line,
 #define NE_XASSERT(x, m) (x)
 #endif
 
-#define NE_ASSERT(x) NE_XASSERT(x, NULL)
+/* This is guaranteed to run but will be checked the same as assert(); */
+#define NEASSERTE(x) NE_XASSERT(x, NULL)
+
+#include <assert.h>
+/* The same as the assert() provided in the standard library. */
+#define NEASSERT(x) assert(x);
 
 #endif /* NE_ASSERT_H */

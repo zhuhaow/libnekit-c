@@ -1,7 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "assert.h"
+#include "ne_assert.h"
 #include "error.h"
 #include "greatest.h"
 #include "ne_mem.h"
@@ -37,12 +37,12 @@ void server_write_cb(uv_write_t *req, int status);
 
 void start_server(server_t *server, uv_connection_cb conn_cb) {
   memset(server, 0, sizeof(server_t));
-  NE_ASSERT(uv_tcp_init(uv_default_loop(), &server->handle) == 0);
+  NEASSERTE(uv_tcp_init(uv_default_loop(), &server->handle) == 0);
   server->handle.data = server;
   struct sockaddr_in addr;
-  NE_ASSERT(uv_ip4_addr("0.0.0.0", TEST_PORT, &addr) == 0);
-  NE_ASSERT(uv_tcp_bind(&server->handle, (struct sockaddr *)&addr, 0) == 0);
-  NE_ASSERT(uv_listen((uv_stream_t *)&server->handle, 30, conn_cb) == 0);
+  NEASSERTE(uv_ip4_addr("0.0.0.0", TEST_PORT, &addr) == 0);
+  NEASSERTE(uv_tcp_bind(&server->handle, (struct sockaddr *)&addr, 0) == 0);
+  NEASSERTE(uv_listen((uv_stream_t *)&server->handle, 30, conn_cb) == 0);
 }
 
 void vanilla_alloc_cb(uv_handle_t *handle, size_t suggested_size,
@@ -81,9 +81,9 @@ void server_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
     return;
   }
 
-  NE_ASSERT(uv_read_stop(stream) == 0);
-  NE_ASSERT(req);
+  NEASSERT(uv_read_stop(stream) == 0);
   uv_write_t *req = NEALLOC(uv_write_t, 1);
+  NEASSERT(req);
   uv_buf_t *write_buf = NEALLOC(uv_buf_t, 1);
   write_buf->base = buf->base;
   write_buf->len = nread;
@@ -96,7 +96,7 @@ void server_write_cb(uv_write_t *req, int status) {
 
   server->socket_stat.write_count++;
 
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
 
   uv_stream_t *server_sock = req->handle;
 
@@ -110,14 +110,14 @@ void server_write_cb(uv_write_t *req, int status) {
 }
 
 void echo_server_conn_cb(uv_stream_t *server, int status) {
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
 
-  NE_ASSERT(server_sock);
-  NE_ASSERT(uv_tcp_init(uv_default_loop(), server_sock) == 0);
   uv_tcp_t *server_sock = NEALLOC(uv_tcp_t, 1);
+  NEASSERT(server_sock);
+  NEASSERTE(uv_tcp_init(uv_default_loop(), server_sock) == 0);
   server_sock->data = server->data;
 
-  NE_ASSERT(uv_accept(server, (uv_stream_t *)server_sock) == 0);
+  NEASSERTE(uv_accept(server, (uv_stream_t *)server_sock) == 0);
   ((server_t *)server->data)->listen_stat.socket_accept++;
   uv_read_start((uv_stream_t *)server_sock, vanilla_alloc_cb, server_read_cb);
 }

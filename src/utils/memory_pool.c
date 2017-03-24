@@ -1,5 +1,5 @@
 #include "memory_pool.h"
-#include "assert.h"
+#include "ne_assert.h"
 #include "ne_mem.h"
 
 ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
@@ -74,7 +74,7 @@ void ne_memory_buf_free(ne_memory_buf_t *buf) {
     return;
   }
 
-  NE_ASSERT(buf->type == POOL);
+  NEASSERT(buf->type == POOL);
 
   buf->used = false;
   SLIST_INSERT_HEAD(&buf->pool->unused_list, buf, pointer);

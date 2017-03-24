@@ -2,8 +2,8 @@
 #include <string.h>
 #include <uv.h>
 
-#include "assert.h"
 #include "config.h"
+#include "ne_assert.h"
 #include "ne_mem.h"
 #include "tcp_socket.h"
 
@@ -101,17 +101,17 @@ static bool __ne_tcp_socket_handle_error(ne_tcp_socket_t *socket, int status) {
   case UV_ECANCELED:
     /* This should only happen when the socket is closing, which is already
      * checked. */
-    NE_ASSERT(false);
+    NEASSERT(false);
   }
   /* Catch all other errors as of now so we know what we should handle but
    * missing. */
-  NE_ASSERT(false);
+  NEASSERT(false);
   return false;
 }
 
 void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr) {
   /* The addr in use error is always delayed. */
-  NE_ASSERT(!uv_tcp_bind(&socket->handle.tcp, addr, 0));
+  NEASSERTE(!uv_tcp_bind(&socket->handle.tcp, addr, 0));
 }
 
 static void __ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
@@ -121,20 +121,20 @@ static void __ne_tcp_socket_accepted(ne_tcp_socket_t *socket) {
 
 static void __ne_tcp_socket_connection_cb(uv_stream_t *listen_stream,
                                           int status) {
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
 
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)listen_stream->data;
   ne_tcp_socket_t *accepted_socket = socket->connection_alloc(socket);
   ne_tcp_socket_init(socket->handle.tcp.loop, accepted_socket);
 
-  NE_ASSERT(uv_accept(listen_stream, &accepted_socket->handle.stream));
+  NEASSERTE(uv_accept(listen_stream, &accepted_socket->handle.stream));
   __ne_tcp_socket_accepted(accepted_socket);
 
   socket->on_connection(socket, accepted_socket);
 }
 
 void ne_tcp_socket_listen(ne_tcp_socket_t *socket, int backlog) {
-  NE_ASSERT(uv_listen(&socket->handle.stream, backlog,
+  NEASSERTE(uv_listen(&socket->handle.stream, backlog,
                       __ne_tcp_socket_connection_cb));
 }
 
@@ -144,7 +144,7 @@ static void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
   if (__ne_tcp_socket_handle_error(socket, status))
     return;
 
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
 
   __ne_tcp_socket_timer_reset(socket);
 
@@ -167,7 +167,7 @@ ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
   case UV_ENETUNREACH:
     return NE_TCP_CENETUNREACH;
   default:
-    NE_ASSERT(false);
+    NEASSERT(false);
     return r;
   }
 }
@@ -200,7 +200,7 @@ static void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
       socket->on_read(socket, NE_TCP_REOF, buf);
     return;
   } else {
-    NE_ASSERT(nread >= 0);
+    NEASSERT(nread >= 0);
     if (socket->on_read)
       socket->on_read(socket, nread, buf);
   }
@@ -215,8 +215,8 @@ static void __ne_tcp_socket_alloc_cb(uv_handle_t *handle,
 }
 
 int ne_tcp_socket_read_start(ne_tcp_socket_t *socket) {
-  NE_ASSERT(socket->status <= SHUT_DOWN);
-  NE_ASSERT(!socket->receiveEOF);
+  NEASSERT(socket->status <= SHUT_DOWN);
+  NEASSERT(!socket->receiveEOF);
   socket->reading = true;
   return uv_read_start(&socket->handle.stream, __ne_tcp_socket_alloc_cb,
                        __ne_tcp_socket_read_cb);
@@ -229,12 +229,12 @@ static void __ne_tcp_socket_write_cb(uv_write_t *req, int status) {
     return;
   }
 
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
   socket->on_write(socket, NE_TCP_WNOERR);
 }
 
 void ne_tcp_socket_write(ne_tcp_socket_t *socket) {
-  NE_ASSERT(socket->status < SHUTTING_DOWN);
+  NEASSERT(socket->status < SHUTTING_DOWN);
   uv_write(&socket->write_req, &socket->handle.stream, &socket->write_buf, 1,
            __ne_tcp_socket_write_cb);
 }
@@ -244,17 +244,17 @@ static void __ne_tcp_socket_shutdown_cb(uv_shutdown_t *req, int status) {
   if (__ne_tcp_socket_handle_error(socket, status))
     return;
 
-  NE_ASSERT(status == 0);
+  NEASSERT(status == 0);
   socket->status = SHUT_DOWN;
   socket->on_shutdown(socket);
 }
 void ne_tcp_socket_shutdown(ne_tcp_socket_t *socket) {
-  NE_ASSERT(socket->status == CONNECTING || socket->status == CONNECTED);
+  NEASSERT(socket->status == CONNECTING || socket->status == CONNECTED);
   socket->status = SHUTTING_DOWN;
   uv_shutdown(&socket->shutdown_req, &socket->handle.stream,
               __ne_tcp_socket_shutdown_cb);
 }
 
 void ne_tcp_socket_deinit(ne_tcp_socket_t *socket) {
-  NE_ASSERT(socket->status == CLOSED);
+  NEASSERT(socket->status == CLOSED);
 }
