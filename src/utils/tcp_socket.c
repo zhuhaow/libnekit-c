@@ -4,10 +4,11 @@
 
 #include "assert.h"
 #include "config.h"
+#include "ne_mem.h"
 #include "tcp_socket.h"
 
 void ne_tcp_socket_init(ne_loop_t *loop, ne_tcp_socket_t *socket) {
-  memset(socket, 0, sizeof(ne_tcp_socket_t));
+  NEMEMSET(socket, 1);
 
   socket->status = INVALID;
 

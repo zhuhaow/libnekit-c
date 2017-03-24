@@ -1,12 +1,12 @@
 #include "memory_pool.h"
 #include "assert.h"
-#include "mem.h"
+#include "ne_mem.h"
 
 ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
                                   size_t block_count) {
   // overflow is not checked, make sure block_size * block_count will not
   // overflow
-  MEMSET(pool, 1);
+  NEMEMSET(pool, 1);
 
   pool->pool_size = block_count * block_size;
   pool->pool_data = calloc(pool->pool_size, 1);
@@ -16,8 +16,8 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
   pool->block_count = block_count;
   pool->block_size = block_size;
 
-  pool->bufs = ALLOC(ne_memory_buf_t, pool->block_count);
   if (!pool->bufs)
+  pool->bufs = NEALLOC(ne_memory_buf_t, pool->block_count);
     return NE_ENOMEM;
 
   SLIST_INIT(&pool->unused_list);

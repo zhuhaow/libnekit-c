@@ -4,13 +4,13 @@
 #include "memory_pool.h"
 #include "error.h"
 #include "queue.h"
-#include "mem.h"
+#include "ne_mem.h"
 
 #define BLOCK_SIZE 1024
 #define BLOCK_COUNT 64
 
 TEST memory_pool_init() {
-  ne_memory_pool_t *pool = ALLOC(ne_memory_pool_t, 1);
+  ne_memory_pool_t *pool = NEALLOC(ne_memory_pool_t, 1);
   ASSERT(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
   ASSERT_EQ(pool->pool_size, BLOCK_COUNT * BLOCK_SIZE);
   ASSERT_EQ(pool->block_size, BLOCK_SIZE);
@@ -20,7 +20,7 @@ TEST memory_pool_init() {
 }
 
 TEST memory_pool_buf() {
-  ne_memory_pool_t *pool = ALLOC(ne_memory_pool_t, 1);
+  ne_memory_pool_t *pool = NEALLOC(ne_memory_pool_t, 1);
   ASSERT(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
 
   ne_memory_buf_t *pool_bufs[BLOCK_COUNT];

@@ -1,7 +1,6 @@
 #include "error.h"
 #include "greatest.h"
 #include "helper.h"
-#include "mem.h"
 #include "tcp_socket.h"
 
 #include "uv.h"

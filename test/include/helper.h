@@ -4,7 +4,7 @@
 #include "assert.h"
 #include "error.h"
 #include "greatest.h"
-#include "mem.h"
+#include "ne_mem.h"
 #include "uv.h"
 #include <string.h>
 
@@ -82,9 +82,9 @@ void server_read_cb(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
   }
 
   NE_ASSERT(uv_read_stop(stream) == 0);
-  uv_write_t *req = ALLOC(uv_write_t, 1);
   NE_ASSERT(req);
-  uv_buf_t *write_buf = ALLOC(uv_buf_t, 1);
+  uv_write_t *req = NEALLOC(uv_write_t, 1);
+  uv_buf_t *write_buf = NEALLOC(uv_buf_t, 1);
   write_buf->base = buf->base;
   write_buf->len = nread;
   req->data = write_buf;
@@ -112,9 +112,9 @@ void server_write_cb(uv_write_t *req, int status) {
 void echo_server_conn_cb(uv_stream_t *server, int status) {
   NE_ASSERT(status == 0);
 
-  uv_tcp_t *server_sock = ALLOC(uv_tcp_t, 1);
   NE_ASSERT(server_sock);
   NE_ASSERT(uv_tcp_init(uv_default_loop(), server_sock) == 0);
+  uv_tcp_t *server_sock = NEALLOC(uv_tcp_t, 1);
   server_sock->data = server->data;
 
   NE_ASSERT(uv_accept(server, (uv_stream_t *)server_sock) == 0);
