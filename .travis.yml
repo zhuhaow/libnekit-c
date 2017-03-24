@@ -22,10 +22,12 @@ addons:
 
 env:
   global:
-    - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=COVERAGE"
+    - SHARED_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=COVERAGE -DNELOG"
   matrix:
     - ARCH="x32"
+      CMAKE_OPTIONS=""
     - ARCH="x64"
+      CMAKE_OPTIONS=""
 
 
 matrix:
