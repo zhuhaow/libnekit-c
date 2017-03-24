@@ -43,10 +43,6 @@ static void __ne_tcp_socket_timer_start(ne_tcp_socket_t *socket) {
                    socket->timeout, socket->timeout);
 }
 
-static void __ne_tcp_socket_timer_stop(ne_tcp_socket_t *socket) {
-  uv_timer_stop(&socket->timeout_timer);
-}
-
 static void __ne_tcp_socket_check_close(ne_tcp_socket_t *socket) {
   if (socket->timer_closed && socket->socket_closed) {
     socket->status = CLOSED;
