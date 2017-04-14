@@ -5,35 +5,18 @@
 
 #include "types.h"
 
-typedef ssize_t ne_tcp_socket_err;
-#define NE_TCP_NOERR 0
-#define NE_TCP_ERST -1
-#define NE_TCP_ETIMEOUT -2
-#define NE_TCP_ENETUNREACH -3
-
-typedef ne_tcp_socket_err ne_tcp_socket_read_err;
-#define NE_TCP_RNOERR 0
-#define NE_TCP_REOF -1
-#define NE_TCP_RERR -2
-
-typedef ne_tcp_socket_err ne_tcp_socket_write_err;
-#define NE_TCP_WNOERR 0
-#define NE_TCP_WERR -1
-
-typedef ne_tcp_socket_err ne_tcp_socket_connect_err;
-#define NE_TCP_CNOERR 0
-#define NE_TCP_CEADDRINUSE -1
-#define NE_TCP_CENETUNREACH NE_TCP_ENETUNREACH
+#include "error.h"
 
 struct ne_tcp_socket;
 typedef struct ne_tcp_socket ne_tcp_socket_t;
 
 typedef void (*ne_tcp_socket_cb)(ne_tcp_socket_t *socket);
 typedef void (*ne_tcp_socket_status_cb)(ne_tcp_socket_t *socket,
-                                        ne_tcp_socket_err status);
+                                        ne_err status);
 typedef void (*ne_tcp_socket_alloc_cb)(ne_tcp_socket_t *socket, ne_buf_t *buf);
 typedef void (*ne_tcp_socket_read_cb)(ne_tcp_socket_t *socket, ssize_t nread,
                                       const ne_buf_t *buf);
+typedef void (*ne_tcp_socket_write_cb)(ne_tcp_socket_t *socket, uint8_t *data, ne_err status);
 
 typedef void (*ne_tcp_socket_connection_cb)(ne_tcp_socket_t *listen_socket,
                                             ne_tcp_socket_t *accepted_socket);
@@ -96,9 +79,8 @@ struct ne_tcp_socket {
   /* The callback when the queued write request is finished or encounters some
    * error. One should check the `status`. If it is other then `NE_TCP_WNOERR`,
    * then the write is failed and the buffer should be relaesed. The socket
-   * should never be wrote again. */
-  ne_tcp_socket_status_cb on_write;
-  ne_buf_t write_buf;
+   * should never be written again. */
+  ne_tcp_socket_write_cb on_write;
 
   ne_tcp_socket_cb on_close;
   ne_tcp_socket_cb on_shutdown;
@@ -118,8 +100,9 @@ struct ne_tcp_socket {
 
   /* Private */
   uv_connect_t connect_req;
-  uv_write_t write_req;
   uv_shutdown_t shutdown_req;
+  uv_write_t write_req;
+  uv_buf_t write_buf;
   ne_timer_t timeout_timer;
 
   bool timer_closed;
@@ -136,7 +119,7 @@ void ne_tcp_socket_bind(ne_tcp_socket_t *socket, struct sockaddr *addr);
 void ne_tcp_socket_listen(ne_tcp_socket_t *socket, int backlog);
 
 /* Connect to remote address. */
-ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
+ne_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
                                                 struct sockaddr *addr);
 
 /* Start reading data, `on_read` will be called if there is data available. */
@@ -146,12 +129,15 @@ int ne_tcp_socket_read_start(ne_tcp_socket_t *socket);
 void ne_tcp_socket_read_stop(ne_tcp_socket_t *socket);
 
 /* Send data according to `write_req`. */
-void ne_tcp_socket_write(ne_tcp_socket_t *socket);
+void ne_tcp_socket_write(ne_tcp_socket_t *socket, uint8_t *data, size_t data_len);
 
 /* Shutdown the socket (sending FIN). */
 void ne_tcp_socket_shutdown(ne_tcp_socket_t *socket);
 
 /* Close the socket, must be called before it is released. */
 void ne_tcp_socket_close(ne_tcp_socket_t *socket);
+
+/* Deinit the socket, the memory is not freed. */
+void ne_tcp_socket_deinit(ne_tcp_socket_t *socket);
 
 #endif /* NE_TCP_SOCKET_H */

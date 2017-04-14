@@ -156,21 +156,20 @@ static void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
   socket->on_connect(socket);
 }
 
-ne_tcp_socket_connect_err ne_tcp_socket_connect(ne_tcp_socket_t *socket,
-                                                struct sockaddr *addr) {
+ne_err ne_tcp_socket_connect(ne_tcp_socket_t *socket, struct sockaddr *addr) {
   int r = uv_tcp_connect(&socket->connect_req, &socket->handle.tcp, addr,
                          __ne_tcp_socket_connect_cb);
   if (!r) {
     socket->status = CONNECTING;
     __ne_tcp_socket_timer_start(socket);
-    return NE_TCP_CNOERR;
+    return NE_NOERR;
   }
 
   switch (r) {
   case UV_EADDRINUSE:
-    return NE_TCP_CEADDRINUSE;
+    return NE_TCP_EADDRINUSE;
   case UV_ENETUNREACH:
-    return NE_TCP_CENETUNREACH;
+    return NE_TCP_ENETUNREACH;
   default:
     NEASSERT(false);
     return r;
@@ -190,7 +189,7 @@ static void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
   if (__ne_tcp_socket_handle_error(socket, nread)) {
     socket->reading = false;
     if (socket->on_read)
-      socket->on_read(socket, NE_TCP_RERR, buf);
+      socket->on_read(socket, NE_GERR, buf);
     return;
   }
 
@@ -202,7 +201,7 @@ static void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
     socket->receiveEOF = true;
     ne_tcp_socket_read_stop(socket);
     if (socket->on_read)
-      socket->on_read(socket, NE_TCP_REOF, buf);
+      socket->on_read(socket, NE_TCP_EOF, buf);
     return;
   } else {
     NEASSERT(nread >= 0);
@@ -230,16 +229,18 @@ int ne_tcp_socket_read_start(ne_tcp_socket_t *socket) {
 static void __ne_tcp_socket_write_cb(uv_write_t *req, int status) {
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)req->handle->data;
   if (__ne_tcp_socket_handle_error(socket, status)) {
-    socket->on_write(socket, NE_TCP_WERR);
+    socket->on_write(socket, (uint8_t *)socket->write_buf.base, NE_GERR);
     return;
   }
 
   NEASSERT(status == 0);
-  socket->on_write(socket, NE_TCP_WNOERR);
+  socket->on_write(socket, (uint8_t *)socket->write_buf.base, NE_NOERR);
 }
 
-void ne_tcp_socket_write(ne_tcp_socket_t *socket) {
+void ne_tcp_socket_write(ne_tcp_socket_t *socket, uint8_t *data, size_t data_len) {
   NEASSERT(socket->status < SHUTTING_DOWN);
+  socket->write_buf.base = (char *)data;
+  socket->write_buf.len = data_len;
   uv_write(&socket->write_req, &socket->handle.stream, &socket->write_buf, 1,
            __ne_tcp_socket_write_cb);
 }
