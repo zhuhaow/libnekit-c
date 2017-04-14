@@ -1,10 +1,10 @@
 #include "greatest.h"
 
+#include "error.h"
 #include "helper.h"
 #include "memory_pool.h"
-#include "error.h"
-#include "queue.h"
 #include "ne_mem.h"
+#include "queue.h"
 
 #define BLOCK_SIZE 1024
 #define BLOCK_COUNT 64
@@ -71,9 +71,23 @@ TEST memory_pool_buf() {
   PASS();
 }
 
+TEST find_upper_buf() {
+  ne_memory_pool_t *pool = NEALLOC(ne_memory_pool_t, 1);
+  ASSERT(ne_memory_pool_init(pool, BLOCK_SIZE, BLOCK_COUNT) == NE_NOERR);
+  ASSERT_EQ(pool->pool_size, BLOCK_COUNT * BLOCK_SIZE);
+  ASSERT_EQ(pool->block_size, BLOCK_SIZE);
+  ASSERT_EQ(pool->block_count, BLOCK_COUNT);
+  ne_memory_buf_t *buf = ne_memory_pool_get_buf(pool);
+  ASSERT_EQ(buf, UPPER_MEMORY_BUF(buf->data));
+  ne_memory_buf_free(buf);
+  ne_memory_pool_free(pool);
+  PASS();
+}
+
 SUITE(suite) {
   RUN_TEST(memory_pool_init);
   RUN_TEST(memory_pool_buf);
+  RUN_TEST(find_upper_buf);
 }
 
 GREATEST_MAIN_DEFS();

@@ -3,7 +3,7 @@
 #include "ne_assert.h"
 #include "ne_mem.h"
 
-ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
+ne_err ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
                                   size_t block_count) {
   // overflow is not checked, make sure block_size * block_count will not
   // overflow
@@ -29,7 +29,7 @@ ne_error_code ne_memory_pool_init(ne_memory_pool_t *pool, size_t block_size,
 
   for (size_t i = 0; i < block_count; ++i) {
     ne_memory_buf_t *buf = pool->bufs + i;
-    buf->data = (char *)pool->pool_data + i * block_size;
+    buf->data = (uint8_t *)pool->pool_data + i * block_size;
     buf->size = block_size;
     buf->type = POOL;
     buf->pool = pool;
