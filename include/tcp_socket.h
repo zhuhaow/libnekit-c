@@ -49,9 +49,6 @@ typedef union {
 
 /* The TCP socket. */
 struct ne_tcp_socket {
-  /* The underlying uv_handle. */
-  ne_uv_tcp_handle_t handle;
-
   /* User context */
   void *context;
 
@@ -92,11 +89,13 @@ struct ne_tcp_socket {
    * the default. Set it to 0 to disable time out. */
   uint64_t timeout;
 
+  /* For listening socket ONLY */
   /* A new connection is accepted from a listening socket. */
   ne_tcp_socket_connection_cb on_connection;
   /* It is expected this method return an allocated memory for a new
    * `ne_tcp_socket_t`. */
   ne_tcp_socket_connection_alloc connection_alloc;
+  /* END: For listening socket ONLY */
 
   /* Private */
   uv_connect_t connect_req;
@@ -104,6 +103,9 @@ struct ne_tcp_socket {
   uv_write_t write_req;
   uv_buf_t write_buf;
   ne_timer_t timeout_timer;
+
+  /* The underlying uv_handle. */
+  ne_uv_tcp_handle_t handle;
 
   bool timer_closed;
   bool socket_closed;
