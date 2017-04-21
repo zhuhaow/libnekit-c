@@ -23,6 +23,7 @@ int ne_log_get_level();
   do {                                                                         \
     printf("%s:%s:%d: " FMT "\n", LEVEL##_STR, __FILE__, __LINE__,             \
            ##__VA_ARGS__);                                                     \
+    fflush(stdout);                                                   \
   } while (0)
 #pragma clang diagnostic pop
 #endif
