@@ -1,24 +1,30 @@
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef NE_ERROR_H
+#define NE_ERROR_H
 
 #include "types.h"
 
-typedef int ne_error_code;
+typedef ssize_t ne_err;
 
+/* General error */
 #define NE_NOERR 0
-#define NE_ENOMEM -1
+#define NE_GERR -1
 
-typedef struct {
-  ne_error_code error_code;
+#define NE_ENOMEM -2
 
-  /* private */
-  char *error_str;
-  bool own_str;
-} ne_error_t;
+/* TCP socket error */
+#define NE_TCP_ERST -100
+#define NE_TCP_ETIMEOUT -101
+#define NE_TCP_ENETUNREACH -102
+#define NE_TCP_EOF -103
+#define NE_TCP_EADDRINUSE -104
 
-void ne_error_init(ne_error_t *error);
-ne_error_t *ne_error_create(ne_error_code error_code);
-char *ne_error_str(ne_error_t *error);
-void ne_error_free(ne_error_t *error);
+/* SOCKS5 server error */
+#define NE_SOCKS5_EVERSION -200
+#define NE_SOCKS5_EAUTHMETHOD -201
+#define NE_SOCKS5_ECOMMAND -202
+#define NE_SOCKS5_EIPV4ADDR -203
+#define NE_SOCKS5_EDEST -204
+#define NE_SOCKS5_EUNKNOWNADDRTYPE -205
 
-#endif /* ERROR_H */
+
+#endif /* NE_ERROR_H */
