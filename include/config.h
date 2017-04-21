@@ -3,7 +3,7 @@
 
 #define LISTEN_BACKLOG 30
 
-#define SOCKET_TIMEOUT 300
+#define SOCKET_TIMEOUT 1000
 
 #ifdef __GNUC__
 #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
