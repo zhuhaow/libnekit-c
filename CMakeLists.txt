@@ -67,12 +67,11 @@ endif()
 
 set(SOURCES
   src/utils/memory_pool.c
-  # instance.c
-  # server/tcp_server.c
-  # socket/tcp_listen_socket.c
   src/utils/tcp_socket.c
   src/utils/log.c
-  # src/socket/proxy/sock5_socket.c
+  src/utils/session.c
+  src/socket/proxy_socket.c
+  src/socket/proxy_socket_socks5.c
   )
 
 link_directories(deps/deps_build/lib)

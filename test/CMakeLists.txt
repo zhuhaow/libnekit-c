@@ -36,6 +36,10 @@ add_executable(test_memory_pool utils/test_memory_pool.c)
 target_link_libraries(test_memory_pool ${LIBS})
 add_mem_test(test_memory_pool)
 
-add_executable(test_tcp_socket socket/test_tcp_socket.c)
+add_executable(test_tcp_socket utils/test_tcp_socket.c)
 target_link_libraries(test_tcp_socket ${LIBS})
 add_mem_test(test_tcp_socket)
+
+add_executable(test_proxy_socket_socks5 socket/test_proxy_socket_socks5.c)
+target_link_libraries(test_proxy_socket_socks5 ${LIBS})
+add_mem_test(test_proxy_socket_socks5)
