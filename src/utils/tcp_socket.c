@@ -33,11 +33,15 @@ static void __ne_tcp_socket_timeout_cb(uv_timer_t *handle) {
 }
 
 static void __ne_tcp_socket_timer_reset(ne_tcp_socket_t *socket) {
+  NELOG(NELOG_DEBUG, "Reset TCP socket timer.");
+
   if (socket->timeout > 0)
     uv_timer_again(&socket->timeout_timer);
 }
 
 static void __ne_tcp_socket_timer_start(ne_tcp_socket_t *socket) {
+  NELOG(NELOG_DEBUG, "Start TCP socket timer.");
+
   if (socket->timeout > 0)
     uv_timer_start(&socket->timeout_timer, __ne_tcp_socket_timeout_cb,
                    socket->timeout, socket->timeout);
@@ -70,6 +74,7 @@ void ne_tcp_socket_close(ne_tcp_socket_t *socket) {
 
   NELOG(NELOG_DEBUG, "Closing tcp socket.");
 
+  /* uv_timer_stop(&socket->timeout_timer); */
   uv_close((uv_handle_t *)&socket->timeout_timer,
            __ne_tcp_socket_timer_close_cb);
   uv_close(&socket->handle.handle, __ne_tcp_socket_socket_close_cb);
@@ -128,19 +133,25 @@ static void __ne_tcp_socket_connection_cb(uv_stream_t *listen_stream,
                                           int status) {
   NEASSERT(status == 0);
 
+  NELOG(NELOG_DEBUG, "Accepting new connection...");
+
   ne_tcp_socket_t *socket = (ne_tcp_socket_t *)listen_stream->data;
   ne_tcp_socket_t *accepted_socket = socket->connection_alloc(socket);
   ne_tcp_socket_init(socket->handle.tcp.loop, accepted_socket);
 
-  NEASSERTE(uv_accept(listen_stream, &accepted_socket->handle.stream));
+  NEASSERTE(!uv_accept(listen_stream, &accepted_socket->handle.stream));
   __ne_tcp_socket_accepted(accepted_socket);
+
+  NELOG(NELOG_DEBUG, "Accepted a new connection.");
 
   socket->on_connection(socket, accepted_socket);
 }
 
 void ne_tcp_socket_listen(ne_tcp_socket_t *socket, int backlog) {
-  NEASSERTE(uv_listen(&socket->handle.stream, backlog,
-                      __ne_tcp_socket_connection_cb));
+  NEASSERTE(!uv_listen(&socket->handle.stream, backlog,
+                       __ne_tcp_socket_connection_cb));
+
+  NELOG(NELOG_DEBUG, "Start listening.");
 }
 
 static void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
@@ -151,12 +162,16 @@ static void __ne_tcp_socket_connect_cb(uv_connect_t *req, int status) {
 
   NEASSERT(status == 0);
 
+  NELOG(NELOG_DEBUG, "Successfully connected.");
+
   __ne_tcp_socket_timer_reset(socket);
 
   socket->on_connect(socket);
 }
 
 ne_err ne_tcp_socket_connect(ne_tcp_socket_t *socket, struct sockaddr *addr) {
+  NELOG(NELOG_DEBUG, "Start connecting.");
+
   int r = uv_tcp_connect(&socket->connect_req, &socket->handle.tcp, addr,
                          __ne_tcp_socket_connect_cb);
   if (!r) {
@@ -193,8 +208,7 @@ static void __ne_tcp_socket_read_cb(uv_stream_t *stream, ssize_t nread,
     return;
   }
 
-  if (nread >= 0)
-    __ne_tcp_socket_timer_reset(socket);
+  __ne_tcp_socket_timer_reset(socket);
 
   if (nread == UV_EOF) {
     socket->reading = false;
@@ -237,7 +251,8 @@ static void __ne_tcp_socket_write_cb(uv_write_t *req, int status) {
   socket->on_write(socket, (uint8_t *)socket->write_buf.base, NE_NOERR);
 }
 
-void ne_tcp_socket_write(ne_tcp_socket_t *socket, uint8_t *data, size_t data_len) {
+void ne_tcp_socket_write(ne_tcp_socket_t *socket, uint8_t *data,
+                         size_t data_len) {
   NEASSERT(socket->status < SHUTTING_DOWN);
   socket->write_buf.base = (char *)data;
   socket->write_buf.len = data_len;
@@ -259,8 +274,4 @@ void ne_tcp_socket_shutdown(ne_tcp_socket_t *socket) {
   socket->status = SHUTTING_DOWN;
   uv_shutdown(&socket->shutdown_req, &socket->handle.stream,
               __ne_tcp_socket_shutdown_cb);
-}
-
-void ne_tcp_socket_deinit(ne_tcp_socket_t *socket) {
-  NEASSERT(socket->status == CLOSED);
 }

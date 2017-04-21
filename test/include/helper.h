@@ -24,7 +24,7 @@ typedef struct {
   int read_count;
   int write_count;
   int alloc_count;
-  ne_error_code last_error;
+  ne_err last_error;
 } socket_stat;
 
 typedef struct {

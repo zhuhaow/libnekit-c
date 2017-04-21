@@ -139,7 +139,4 @@ void ne_tcp_socket_shutdown(ne_tcp_socket_t *socket);
 /* Close the socket, must be called before it is released. */
 void ne_tcp_socket_close(ne_tcp_socket_t *socket);
 
-/* Deinit the socket, the memory is not freed. */
-void ne_tcp_socket_deinit(ne_tcp_socket_t *socket);
-
 #endif /* NE_TCP_SOCKET_H */
